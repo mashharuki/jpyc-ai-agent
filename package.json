@@ -1,0 +1,40 @@
+{
+  "name": "jpyc-ai-agent",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "pnpm --filter @jpyc/sdk-core compile && pnpm install && next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.58",
+    "@jpyc/sdk-core": "file:external/jpyc-sdk/packages/core",
+    "@mastra/core": "^0.23.3",
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "ai": "^5.0.83",
+    "autoprefixer": "^10.4.17",
+    "dotenv": "^16.4.1",
+    "next": "^15.1.0",
+    "openai": "^4.77.0",
+    "postcss": "^8.4.33",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "soltypes": "^2.0.0",
+    "tailwindcss": "^3.4.1",
+    "tslib": "^2.8.1",
+    "typescript": "^5.7.2",
+    "viem": "^2.38.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^15.1.0"
+  }
+}

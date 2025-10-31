@@ -1,0 +1,2 @@
+packages:
+  - 'external/jpyc-sdk/packages/*'
