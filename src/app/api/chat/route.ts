@@ -3,7 +3,7 @@ import { jpycAgent } from '@/lib/mastra/agent';
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, conversationId } = await req.json();
+    const { message, conversationId, profile, friends } = await req.json();
 
     if (!message) {
       return NextResponse.json(
@@ -12,9 +12,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Mastraのバージョンによって、chat()メソッドのAPIが異なる可能性があります
-    // 最新のMastraではgenerate()メソッドを使う場合もあります
-    const response = await jpycAgent.generate(message, {
+    // プロフィールと友達リストをコンテキストとして追加
+    let contextMessage = message;
+    if (profile || (friends && friends.length > 0)) {
+      let context = '\n\n[ユーザー情報]\n';
+
+      if (profile) {
+        context += `- 自分の名前: ${profile.name}\n`;
+        context += `- 自分のアドレス: ${profile.address}\n`;
+      }
+
+      if (friends && friends.length > 0) {
+        context += '\n[友達リスト]\n';
+        friends.forEach((friend: { name: string; address: string }) => {
+          context += `- ${friend.name}: ${friend.address}\n`;
+        });
+      }
+
+      contextMessage = message + context;
+    }
+
+    const response = await jpycAgent.generate(contextMessage, {
       // conversationIdがある場合は渡す
       ...(conversationId && { conversationId }),
     });

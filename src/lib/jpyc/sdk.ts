@@ -203,6 +203,10 @@ export const jpyc = {
     try {
       const walletClient = getWalletClient();
 
+      if (!walletClient.account) {
+        throw new Error('Wallet client account is not initialized');
+      }
+
       // numberを18桁のBigIntに変換
       const amount = parseUnits(params.value.toString(), 18);
 
@@ -212,6 +216,8 @@ export const jpyc = {
         abi: ERC20_ABI,
         functionName: 'transfer',
         args: [params.to, amount],
+        account: walletClient.account,
+        chain: CHAIN_MAP[_currentChain],
       });
 
       return hash;
