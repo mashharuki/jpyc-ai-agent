@@ -10,6 +10,7 @@
 		"format": "pnpm exec biome format --write ."
 	},
 	"dependencies": {
+		"@ai-sdk/google": "^2.0.26",
 		"@ai-sdk/openai": "^2.0.58",
 		"@jpyc/sdk-core": "file:external/jpyc-sdk/packages/core",
 		"@mastra/core": "^0.23.3",

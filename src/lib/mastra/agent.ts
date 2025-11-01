@@ -1,12 +1,13 @@
 // @ts-nocheck - Mastra 0.23.3のAPI変更により型定義が異なるため
-import { Agent } from "@mastra/core";
-import { createOpenAI } from "@ai-sdk/openai";
 
-import { switchChainTool } from "@/mcp-server/tools/switchChain";
-import { getCurrentChainTool } from "@/mcp-server/tools/getCurrentChain";
-import { transferTool } from "@/mcp-server/tools/transfer";
 import { balanceTool } from "@/mcp-server/tools/balance";
+import { getCurrentChainTool } from "@/mcp-server/tools/getCurrentChain";
+import { switchChainTool } from "@/mcp-server/tools/switchChain";
 import { totalSupplyTool } from "@/mcp-server/tools/totalSupply";
+import { transferTool } from "@/mcp-server/tools/transfer";
+import { google } from '@ai-sdk/google';
+import { createOpenAI } from "@ai-sdk/openai";
+import { Agent } from "@mastra/core";
 
 // Mastra用のOpenAIプロバイダーを作成
 const openai = createOpenAI({
@@ -21,7 +22,8 @@ export const jpycAgent = new Agent({
 	description:
 		"JPYCトークンの操作をサポートするAIアシスタント（マルチチェーン対応）",
 	// @ts-ignore
-	model: gpt4oMiniModel,
+	// model: gpt4oMiniModel,
+	model: google("gemini-2.5-flash"),
 	tools: [
 		{
 			name: switchChainTool.name,
