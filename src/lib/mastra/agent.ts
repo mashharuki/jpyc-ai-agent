@@ -21,6 +21,7 @@ export const jpycAgent = new Agent({
   description: 'JPYCトークンの操作をサポートするAIアシスタント（マルチチェーン対応）',
   // @ts-ignore
   model: gpt4oMiniModel,
+  // model: google('gemini-2.5-flash'),
   tools: [
     {
       name: switchChainTool.name,
