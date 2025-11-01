@@ -24,7 +24,7 @@ export const jpycAgent = new Agent({
 		"JPYCトークンの操作をサポートするAIアシスタント（マルチチェーン対応）",
 	// @ts-ignore
 	// model: gpt4oMiniModel,
-	model: google("gemini-2.5-flash"),
+	model: google("gemini-2.5-pro"),
 	// ツールは動的に解決
 	// MCPServerから直接ツールを取得
 	tools: async () => {

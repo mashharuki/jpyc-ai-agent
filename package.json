@@ -7,7 +7,8 @@
 		"build": "pnpm --filter @jpyc/sdk-core compile && pnpm install && next build",
 		"start": "next start",
 		"lint": "next lint",
-		"format": "pnpm exec biome format --write ."
+		"format": "pnpm exec biome format --write .",
+		"test:tools": "tsx tests/mcp-tools-direct.test.ts"
 	},
 	"dependencies": {
 		"@ai-sdk/google": "^2.0.26",
@@ -39,6 +40,7 @@
 		"@biomejs/biome": "2.3.2",
 		"@types/node": "^22.10.0",
 		"eslint": "^8.57.0",
-		"eslint-config-next": "^15.1.0"
+		"eslint-config-next": "^15.1.0",
+		"tsx": "^4.20.6"
 	}
 }

@@ -1,14 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
 import { jpycAgent } from "@/lib/mastra/agent";
+import type { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
 	try {
 		const { message, conversationId, profile, friends } = await req.json();
 
 		if (!message) {
-			return NextResponse.json(
-				{ success: false, error: "Message is required" },
-				{ status: 400 },
+			return new Response(
+				JSON.stringify({ success: false, error: "Message is required" }),
+				{ 
+					status: 400,
+					headers: { "Content-Type": "application/json" }
+				},
 			);
 		}
 
@@ -24,33 +27,57 @@ export async function POST(req: NextRequest) {
 
 			if (friends && friends.length > 0) {
 				context += "\n[友達リスト]\n";
-				friends.forEach((friend: { name: string; address: string }) => {
+				for (const friend of friends) {
 					context += `- ${friend.name}: ${friend.address}\n`;
-				});
+				}
 			}
 
 			contextMessage = message + context;
 		}
 
-		const response = await jpycAgent.generate(contextMessage, {
+		// ストリーミングレスポンスを使用
+		const streamResponse = await jpycAgent.stream(contextMessage, {
 			// conversationIdがある場合は渡す
 			...(conversationId && { conversationId }),
 		});
 
-		return NextResponse.json({
-			success: true,
-			response: response.text || JSON.stringify(response),
-			conversationId: conversationId || "default",
+		// テキストストリームをReadableStreamに変換
+		const encoder = new TextEncoder();
+		const stream = new ReadableStream({
+			async start(controller) {
+				try {
+					for await (const chunk of streamResponse.textStream) {
+						// チャンクをエンコードして送信
+						controller.enqueue(encoder.encode(chunk));
+					}
+					controller.close();
+				} catch (error) {
+					console.error("Stream error:", error);
+					controller.error(error);
+				}
+			},
 		});
-	} catch (error: any) {
+
+		// ストリームを返す
+		return new Response(stream, {
+			headers: {
+				"Content-Type": "text/plain; charset=utf-8",
+				"Cache-Control": "no-cache",
+				"Connection": "keep-alive",
+			},
+		});
+	} catch (error) {
 		console.error("Chat API Error:", error);
-		return NextResponse.json(
-			{
+		return new Response(
+			JSON.stringify({
 				success: false,
 				error:
-					error.message || "An error occurred while processing your request",
+					error instanceof Error ? error.message : "An error occurred while processing your request",
+			}),
+			{ 
+				status: 500,
+				headers: { "Content-Type": "application/json" }
 			},
-			{ status: 500 },
 		);
 	}
 }

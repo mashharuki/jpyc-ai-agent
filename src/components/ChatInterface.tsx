@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import ReactMarkdown from "react-markdown";
 import {
-	getProfile,
-	setProfile,
-	deleteProfile,
-	getFriends,
 	addFriend,
 	deleteFriend,
-	type UserProfile,
+	deleteProfile,
 	type Friend,
+	getFriends,
+	getProfile,
+	setProfile,
+	type UserProfile,
 } from "@/lib/storage/localStorage";
+import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 type Message = {
 	role: "user" | "assistant";
@@ -99,27 +99,51 @@ export default function ChatInterface() {
 				}),
 			});
 
-			const data = await response.json();
-
-			if (data.success) {
-				setConversationId(data.conversationId);
-				setMessages((prev) => [
-					...prev,
-					{
-						role: "assistant",
-						content: data.response,
-						timestamp: new Date(),
-					},
-				]);
-			} else {
-				throw new Error(data.error);
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
 			}
-		} catch (error: any) {
+
+			// ストリーミングレスポンスを処理
+			const reader = response.body?.getReader();
+			const decoder = new TextDecoder();
+			let assistantMessage = "";
+
+			// アシスタントメッセージの枠を追加
 			setMessages((prev) => [
 				...prev,
 				{
 					role: "assistant",
-					content: `❌ エラー: ${error.message}`,
+					content: "",
+					timestamp: new Date(),
+				},
+			]);
+
+			if (reader) {
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) break;
+
+					const chunk = decoder.decode(value);
+					assistantMessage += chunk;
+
+					// メッセージを更新
+					setMessages((prev) => {
+						const newMessages = [...prev];
+						newMessages[newMessages.length - 1] = {
+							role: "assistant",
+							content: assistantMessage,
+							timestamp: new Date(),
+						};
+						return newMessages;
+					});
+				}
+			}
+		} catch (error) {
+			setMessages((prev) => [
+				...prev,
+				{
+					role: "assistant",
+					content: `❌ エラー: ${error instanceof Error ? error.message : "不明なエラー"}`,
 					timestamp: new Date(),
 				},
 			]);
