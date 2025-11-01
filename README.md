@@ -41,7 +41,7 @@ JPYC AI Agentは、チャットで指示を送るだけでJPYC（日本円ステ
 ### 1. 環境変数のテンプレートファイルを作成する
 
 ```bash
-cp .env.example .env.local
+cp .env.local.example .env.local
 ```
 
 セットアップが必要な環境変数は以下の通り：
@@ -115,6 +115,12 @@ git clone --recurse-submodules https://github.com/YOUR_USERNAME/jpyc-ai-agent.gi
 cd jpyc-ai-agent
 ```
 
+### クローンした後に git submodulesを追加するコマンド
+
+```bash
+git submodule update --init --recursive
+```
+
 ### インストール
 
 ```bash
@@ -130,6 +136,8 @@ pnpm build
 ```
 
 ### 起動
+
+**必ずビルドした後に実行してください！**
 
 ```bash
 pnpm dev
