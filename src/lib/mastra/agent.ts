@@ -1,11 +1,6 @@
 // @ts-nocheck - Mastra 0.23.3のAPI変更により型定義が異なるため
 
-import { balanceTool } from "@/mcp-server/tools/balance";
-import { getCurrentChainTool } from "@/mcp-server/tools/getCurrentChain";
-import { switchChainTool } from "@/mcp-server/tools/switchChain";
-import { totalSupplyTool } from "@/mcp-server/tools/totalSupply";
-import { transferTool } from "@/mcp-server/tools/transfer";
-import { google } from '@ai-sdk/google';
+import { google } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { Agent } from "@mastra/core";
 
@@ -17,6 +12,12 @@ const openai = createOpenAI({
 // gpt-4o-miniモデルを使用（安価で高速、推論トークンなし）
 const gpt4oMiniModel = openai("gpt-4o-mini");
 
+/**
+ * JPYC エージェント
+ * 
+ * MCPサーバーのツールを直接使用するエージェント
+ * ツールは動的に解決されるため、循環参照の問題を回避
+ */
 export const jpycAgent = new Agent({
 	name: "JPYC Assistant",
 	description:
@@ -24,43 +25,21 @@ export const jpycAgent = new Agent({
 	// @ts-ignore
 	// model: gpt4oMiniModel,
 	model: google("gemini-2.5-flash"),
-	tools: [
-		{
-			name: switchChainTool.name,
-			description: switchChainTool.description,
-			// @ts-ignore
-			parameters: switchChainTool.inputSchema,
-			execute: switchChainTool.execute,
-		},
-		{
-			name: getCurrentChainTool.name,
-			description: getCurrentChainTool.description,
-			// @ts-ignore
-			parameters: getCurrentChainTool.inputSchema,
-			execute: getCurrentChainTool.execute,
-		},
-		{
-			name: transferTool.name,
-			description: transferTool.description,
-			// @ts-ignore
-			parameters: transferTool.inputSchema,
-			execute: transferTool.execute,
-		},
-		{
-			name: balanceTool.name,
-			description: balanceTool.description,
-			// @ts-ignore
-			parameters: balanceTool.inputSchema,
-			execute: balanceTool.execute,
-		},
-		{
-			name: totalSupplyTool.name,
-			description: totalSupplyTool.description,
-			// @ts-ignore
-			parameters: totalSupplyTool.inputSchema,
-			execute: totalSupplyTool.execute,
-		},
-	],
+	// ツールは動的に解決
+	// MCPServerから直接ツールを取得
+	tools: async () => {
+		const { jpycMCPServer } = await import("@/mcp-server");
+		// MCPServerからツールを取得
+		const tools = jpycMCPServer.tools;
+		
+		// Mastraのツール形式に変換
+		const mastraTools: Record<string, any> = {};
+		for (const [key, tool] of Object.entries(tools)) {
+			mastraTools[key] = tool;
+		}
+		
+		return mastraTools;
+	},
 	instructions: `
 あなたはJPYC（日本円ステーブルコイン）の操作をサポートするAIアシスタントです。
 
