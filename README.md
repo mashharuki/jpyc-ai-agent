@@ -51,8 +51,12 @@ cp .env.local.example .env.local
 # ⚠️ 本番環境では絶対に使用しないでください！テストネット専用です
 PRIVATE_KEY=0x... # テストネット用の秘密鍵
 
-# AI API Keys
+# AI API Keys(自分の使いたいモデルに必要なAPIキーをセットしてください。 ※ Claudeを推奨)
 OPENAI_API_KEY=sk-proj-... # OpenAI APIキー
+GOOGLE_GENERATIVE_AI_API_KEY= # Gemini APIキー
+ANTHROPIC_API_KEY= # Claude APIキー
+# JPYC MCPサーバーURL
+JPYC_MCP_SERVER_URL="http://localhost:3001/sse"
 ```
 
 ### 2. OpenAI APIキーを発行すること
