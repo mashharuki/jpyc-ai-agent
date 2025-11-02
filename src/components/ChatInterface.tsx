@@ -21,7 +21,7 @@ type Message = {
 
 /**
  * ChatInterfaceコンポーネント
- * @returns 
+ * @returns
  */
 export default function ChatInterface() {
 	const [messages, setMessages] = useState<Message[]>([]);

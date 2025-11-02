@@ -1,12 +1,11 @@
-
 import { Agent } from "@mastra/core/agent";
 import { claude } from "./model";
 
 /**
  * JPYC エージェント
- * 
+ *
  * MCP経由でJPYC SDKツールを使用するエージェント
- * 
+ *
  * 学習用ポイント:
  * - tools は動的関数として定義
  * - MCPClientから getTools() でツールを取得

@@ -3,8 +3,8 @@ import type { NextRequest } from "next/server";
 
 /**
  * AI AgentのAPIを呼び出すエンドポイント
- * @param req 
- * @returns 
+ * @param req
+ * @returns
  */
 export async function POST(req: NextRequest) {
 	try {
@@ -14,9 +14,9 @@ export async function POST(req: NextRequest) {
 		if (!message) {
 			return new Response(
 				JSON.stringify({ success: false, error: "Message is required" }),
-				{ 
+				{
 					status: 400,
-					headers: { "Content-Type": "application/json" }
+					headers: { "Content-Type": "application/json" },
 				},
 			);
 		}
@@ -54,24 +54,29 @@ export async function POST(req: NextRequest) {
 			steps: response.steps?.length,
 			toolResults: response.toolResults?.length,
 		});
-		
+
 		// レスポンステキストを返す
-		return new Response(response.text || "エージェントからの応答がありませんでした", {
-			headers: {
-				"Content-Type": "text/plain; charset=utf-8",
+		return new Response(
+			response.text || "エージェントからの応答がありませんでした",
+			{
+				headers: {
+					"Content-Type": "text/plain; charset=utf-8",
+				},
 			},
-		});
+		);
 	} catch (error) {
 		console.error("Chat API Error:", error);
 		return new Response(
 			JSON.stringify({
 				success: false,
 				error:
-					error instanceof Error ? error.message : "An error occurred while processing your request",
+					error instanceof Error
+						? error.message
+						: "An error occurred while processing your request",
 			}),
-			{ 
+			{
 				status: 500,
-				headers: { "Content-Type": "application/json" }
+				headers: { "Content-Type": "application/json" },
 			},
 		);
 	}

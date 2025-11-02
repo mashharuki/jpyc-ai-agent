@@ -139,6 +139,16 @@ pnpm build
 
 **必ずビルドした後に実行してください！**
 
+まずJPYC MCP サーバーを起動させます。
+
+```bash
+pnpm run mcp:dev
+```
+
+これで、 `http://localhost:3001` でJPYC MCPサーバーが立ち上がります。
+
+この状態でWebアプリを起動させます。
+
 ```bash
 pnpm run dev
 ```

@@ -73,7 +73,7 @@ let _walletClient: ReturnType<typeof createWalletClient> | null = null;
 
 /**
  * チェーンに接続するためのクライアントインスタンスを生成するメソッド
- * @param chain 
+ * @param chain
  */
 function createClients(chain: SupportedChain) {
 	// 環境変数の検証
@@ -105,7 +105,7 @@ function createClients(chain: SupportedChain) {
 
 /**
  * パブリッククライアントインスタンスを取得するメソッド
- * @returns 
+ * @returns
  */
 function getPublicClient() {
 	if (!_publicClient) {
@@ -116,7 +116,7 @@ function getPublicClient() {
 
 /**
  * ウォレットクライアントインスタンスを取得するメソッド
- * @returns 
+ * @returns
  */
 function getWalletClient() {
 	if (!_walletClient) {
@@ -127,7 +127,7 @@ function getWalletClient() {
 
 /**
  * チェーンを切り替える関数
- * @param chain 
+ * @param chain
  */
 export function switchChain(chain: SupportedChain): void {
 	if (!CHAIN_MAP[chain]) {
@@ -142,7 +142,7 @@ export function switchChain(chain: SupportedChain): void {
 
 /**
  * 現在のチェーンを取得する関数
- * @returns 
+ * @returns
  */
 export function getCurrentChain(): SupportedChain {
 	return _currentChain;
@@ -150,8 +150,8 @@ export function getCurrentChain(): SupportedChain {
 
 /**
  * チェーンの表示名を取得する関数
- * @param chain 
- * @returns 
+ * @param chain
+ * @returns
  */
 export function getChainName(chain?: SupportedChain): string {
 	const targetChain = chain || _currentChain;
@@ -160,7 +160,7 @@ export function getChainName(chain?: SupportedChain): string {
 
 /**
  * 現在のアカウントアドレスを取得する関数
- * @returns 
+ * @returns
  */
 export function getCurrentAddress(): Hex {
 	if (!process.env.PRIVATE_KEY) {
@@ -178,7 +178,7 @@ export function getCurrentAddress(): Hex {
 export const jpyc = {
 	/**
 	 * 総供給量を取得するメソッド
-	 * @returns 
+	 * @returns
 	 */
 	async totalSupply(): Promise<string> {
 		try {
@@ -211,8 +211,8 @@ export const jpyc = {
 
 	/**
 	 * JPYCの残高を取得するメソッド
-	 * @param params 
-	 * @returns 
+	 * @param params
+	 * @returns
 	 */
 	async balanceOf(params: { account: Hex }): Promise<string> {
 		try {
@@ -246,8 +246,8 @@ export const jpyc = {
 
 	/**
 	 * JPYCを送金するメソッド
-	 * @param params 
-	 * @returns 
+	 * @param params
+	 * @returns
 	 */
 	async transfer(params: { to: Hex; value: number }): Promise<string> {
 		try {
