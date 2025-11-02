@@ -1,19 +1,21 @@
 {
-	"name": "jpyc-ai-agent",
+	"name": "@jpyc-ai-agent/main",
 	"version": "0.1.0",
 	"private": true,
+	"exports": {
+		"./lib/*": "./src/lib/*"
+	},
 	"scripts": {
 		"dev": "next dev",
-		"build": "pnpm --filter @jpyc/sdk-core compile && pnpm install && next build",
+		"mcp:dev": "pnpm --filter @jpyc/mcp-server dev",
+		"build": "pnpm --filter @jpyc/sdk-core compile && pnpm --filter @jpyc/mcp-server build && next build",
 		"start": "next start",
 		"lint": "next lint",
-		"format": "pnpm exec biome format --write .",
-		"test:tools": "tsx tests/mcp-tools-direct.test.ts"
+		"format": "pnpm exec biome format --write ."
 	},
 	"dependencies": {
 		"@ai-sdk/google": "^2.0.26",
 		"@ai-sdk/openai": "^2.0.58",
-		"@jpyc/sdk-core": "file:external/jpyc-sdk/packages/core",
 		"@mastra/core": "^0.23.3",
 		"@mastra/mcp": "^0.14.1",
 		"@modelcontextprotocol/sdk": "^1.0.4",

@@ -14,9 +14,6 @@ importers:
       '@ai-sdk/openai':
         specifier: ^2.0.58
         version: 2.0.59(zod@3.25.76)
-      '@jpyc/sdk-core':
-        specifier: file:external/jpyc-sdk/packages/core
-        version: file:external/jpyc-sdk/packages/core(typescript@5.9.3)(zod@3.25.76)
       '@mastra/core':
         specifier: ^0.23.3
         version: 0.23.3(openapi-types@12.1.3)(react@19.2.0)(zod@3.25.76)
@@ -245,6 +242,34 @@ importers:
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@22.18.13)(happy-dom@18.0.1)(tsx@4.20.6)
+
+  external/mcp:
+    dependencies:
+      '@jpyc/sdk-core':
+        specifier: workspace:*
+        version: link:../jpyc-sdk/packages/core
+      '@mastra/core':
+        specifier: ^0.23.3
+        version: 0.23.3(openapi-types@12.1.3)(react@19.2.0)(zod@3.25.76)
+      '@mastra/mcp':
+        specifier: ^0.14.1
+        version: 0.14.1(@mastra/core@0.23.3)(@types/json-schema@7.0.15)(zod@3.25.76)
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.6.1
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.18.13
+      tsx:
+        specifier: ^4.20.6
+        version: 4.20.6
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
 
 packages:
 
@@ -13215,20 +13240,4 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
-    dev: false
-
-  file:external/jpyc-sdk/packages/core(typescript@5.9.3)(zod@3.25.76):
-    resolution: {directory: external/jpyc-sdk/packages/core, type: directory}
-    id: file:external/jpyc-sdk/packages/core
-    name: '@jpyc/sdk-core'
-    engines: {node: ^20.12.0, yarn: ^1.22.22}
-    dependencies:
-      dotenv: 16.6.1
-      soltypes: 2.0.0
-      viem: 2.38.6(typescript@5.9.3)(zod@3.25.76)
-    transitivePeerDependencies:
-      - bufferutil
-      - typescript
-      - utf-8-validate
-      - zod
     dev: false

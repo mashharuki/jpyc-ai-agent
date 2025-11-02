@@ -24,6 +24,10 @@
         "--context",
         "ide-assistant"
       ]
+    },
+    "jpyc:mcp-server": {
+      "type": "sse",
+      "url": "http://localhost:3001/sse"
     }
   }
 }
