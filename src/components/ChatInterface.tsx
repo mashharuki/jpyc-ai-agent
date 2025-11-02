@@ -19,6 +19,10 @@ type Message = {
 	timestamp: Date;
 };
 
+/**
+ * ChatInterfaceコンポーネント
+ * @returns 
+ */
 export default function ChatInterface() {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [input, setInput] = useState("");

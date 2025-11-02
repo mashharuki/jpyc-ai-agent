@@ -1,8 +1,14 @@
 import { jpycAgent } from "@/lib/mastra/agent";
 import type { NextRequest } from "next/server";
 
+/**
+ * AI AgentのAPIを呼び出すエンドポイント
+ * @param req 
+ * @returns 
+ */
 export async function POST(req: NextRequest) {
 	try {
+		// リクエストパラメータからメッセージ、会話ID、プロフィール、友達リストを取得
 		const { message, conversationId, profile, friends } = await req.json();
 
 		if (!message) {
@@ -35,35 +41,24 @@ export async function POST(req: NextRequest) {
 			contextMessage = message + context;
 		}
 
-		// ストリーミングレスポンスを使用
-		const streamResponse = await jpycAgent.stream(contextMessage, {
-			// conversationIdがある場合は渡す
+		// Mastraで定義したJPYC AI Agentの機能を呼び出す
+		const response = await jpycAgent.generate(contextMessage, {
 			...(conversationId && { conversationId }),
 		});
 
-		// テキストストリームをReadableStreamに変換
-		const encoder = new TextEncoder();
-		const stream = new ReadableStream({
-			async start(controller) {
-				try {
-					for await (const chunk of streamResponse.textStream) {
-						// チャンクをエンコードして送信
-						controller.enqueue(encoder.encode(chunk));
-					}
-					controller.close();
-				} catch (error) {
-					console.error("Stream error:", error);
-					controller.error(error);
-				}
-			},
+		console.log("Full generate response:", JSON.stringify(response, null, 2));
+		console.log("Generate response summary:", {
+			text: response.text,
+			textLength: response.text?.length,
+			object: response.object,
+			steps: response.steps?.length,
+			toolResults: response.toolResults?.length,
 		});
-
-		// ストリームを返す
-		return new Response(stream, {
+		
+		// レスポンステキストを返す
+		return new Response(response.text || "エージェントからの応答がありませんでした", {
 			headers: {
 				"Content-Type": "text/plain; charset=utf-8",
-				"Cache-Control": "no-cache",
-				"Connection": "keep-alive",
 			},
 		});
 	} catch (error) {

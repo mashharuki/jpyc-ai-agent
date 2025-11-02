@@ -14,12 +14,13 @@
 		"format": "pnpm exec biome format --write ."
 	},
 	"dependencies": {
+		"@ai-sdk/anthropic": "^2.0.40",
 		"@ai-sdk/google": "^2.0.26",
 		"@ai-sdk/openai": "^2.0.58",
+		"@jpyc/sdk-core": "workspace:*",
 		"@mastra/core": "^0.23.3",
 		"@mastra/mcp": "^0.14.1",
 		"@modelcontextprotocol/sdk": "^1.0.4",
-		"@jpyc/sdk-core": "workspace:*",
 		"@types/node": "^22.10.0",
 		"@types/react": "^19.0.1",
 		"@types/react-dom": "^19.0.1",

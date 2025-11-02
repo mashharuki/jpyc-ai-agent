@@ -1,6 +1,6 @@
 
 import { Agent } from "@mastra/core/agent";
-import { gpt4oMiniModel } from "./model";
+import { claude } from "./model";
 
 /**
  * JPYC エージェント
@@ -16,7 +16,7 @@ export const jpycAgent = new Agent({
 	name: "JPYC Assistant",
 	description:
 		"JPYCトークンの操作をサポートするAIアシスタント（マルチチェーン対応）",
-	model: gpt4oMiniModel,
+	model: claude,
 	// MCPClient経由でツールを動的に取得
 	tools: async () => {
 		const { jpycMCPClient } = await import("@/lib/mastra/mcp/client");

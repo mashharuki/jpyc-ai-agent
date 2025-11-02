@@ -1,5 +1,9 @@
+import { anthropic } from "@ai-sdk/anthropic";
 import { google } from "@ai-sdk/google";
 import { createOpenAI } from '@ai-sdk/openai';
+
+// Claude 3.5 Sonnetモデルを使用
+const claude = anthropic('claude-sonnet-4-0');
 
 // Mastra用のOpenAIプロバイダーを作成
 const openai = createOpenAI({
@@ -11,4 +15,5 @@ const gpt4oMiniModel = openai('gpt-4o-mini');
 const gemini = google("gemini-2.5-pro");
 
 
-export { gemini, gpt4oMiniModel };
+export { claude, gemini, gpt4oMiniModel };
+
