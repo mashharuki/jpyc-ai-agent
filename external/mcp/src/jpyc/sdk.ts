@@ -183,6 +183,7 @@ export const jpyc = {
 	async totalSupply(): Promise<string> {
 		try {
 			const publicClient = getPublicClient();
+			// viemを使ってコントラクトのtotalSupply関数を呼び出す
 			const result = await publicClient.readContract({
 				address: JPYC_CONTRACT_ADDRESS,
 				abi: ERC20_ABI,
@@ -217,6 +218,7 @@ export const jpyc = {
 	async balanceOf(params: { account: Hex }): Promise<string> {
 		try {
 			const publicClient = getPublicClient();
+			// viemを使ってコントラクトのbalanceOf関数を呼び出す
 			const result = await publicClient.readContract({
 				address: JPYC_CONTRACT_ADDRESS,
 				abi: ERC20_ABI,

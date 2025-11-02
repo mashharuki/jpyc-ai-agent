@@ -41,6 +41,7 @@ export const jpycBalanceTool = createTool({
 	execute: async ({ context }) => {
 		try {
 			const { address } = context;
+			// 現在接続中のチェーン情報を取得
 			const currentChain = getCurrentChain();
 			const chainName = getChainName(currentChain);
 
@@ -86,9 +87,11 @@ export const jpycTransferTool = createTool({
 	execute: async ({ context }) => {
 		try {
 			const { to, amount } = context;
+			// 現在接続中のチェーン情報を取得
 			const currentChain = getCurrentChain();
 			const chainName = getChainName(currentChain);
 
+			// SDKのtransferメソッドを呼び出してJPYCを送金する
 			const txHash = await jpyc.transfer({
 				to: to as `0x${string}`,
 				value: amount,
@@ -131,8 +134,9 @@ export const jpycSwitchChainTool = createTool({
 	execute: async ({ context }) => {
 		try {
 			const { chain } = context;
+			// 接続前のチェーンを取得
 			const previousChain = getCurrentChain();
-
+			// チェーンを切り替え
 			await switchChain(chain as SupportedChain);
 
 			const newChainName = getChainName(chain as SupportedChain);
@@ -165,6 +169,7 @@ export const jpycGetCurrentChainTool = createTool({
 	inputSchema: z.object({}),
 	execute: async () => {
 		try {
+			// 現在接続中のチェーン情報を取得
 			const currentChain = getCurrentChain();
 			const chainName = getChainName(currentChain);
 
@@ -194,8 +199,10 @@ export const jpycTotalSupplyTool = createTool({
 	inputSchema: z.object({}),
 	execute: async () => {
 		try {
+			// 現在接続中のチェーン情報を取得
 			const currentChain = getCurrentChain();
 			const chainName = getChainName(currentChain);
+			// SDKのtotalSupplyメソッドを呼び出して総供給量を取得する
 			const totalSupply = await jpyc.totalSupply();
 
 			return {
@@ -215,7 +222,7 @@ export const jpycTotalSupplyTool = createTool({
 });
 
 /**
- * すべてのJPYCツール
+ * すべてのJPYCツールをエクスポートする
  */
 export const jpycTools = {
 	jpyc_balance: jpycBalanceTool,
