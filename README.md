@@ -159,11 +159,7 @@ pnpm run dev
 
 アプリケーションが `http://localhost:3000` で起動します。
 
-### フォーマッター適用（オプション）
-
-```bash
-pnpm format
-```
+**もしAIチャットの出力がオブジェクト形式になっている場合は `src/lib/mastra/agent.ts`で使用しているモデルを別のもの(geminiなど)に切り替えてみてください。**
 
 ---
 
