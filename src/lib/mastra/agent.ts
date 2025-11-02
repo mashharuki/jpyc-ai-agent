@@ -1,5 +1,6 @@
-import { google } from "@ai-sdk/google";
-import { Agent } from "@mastra/core";
+
+import { Agent } from "@mastra/core/agent";
+import { gpt4oMiniModel } from "./model";
 
 /**
  * JPYC エージェント
@@ -15,10 +16,10 @@ export const jpycAgent = new Agent({
 	name: "JPYC Assistant",
 	description:
 		"JPYCトークンの操作をサポートするAIアシスタント（マルチチェーン対応）",
-	model: google("gemini-2.5-pro"),
+	model: gpt4oMiniModel,
 	// MCPClient経由でツールを動的に取得
 	tools: async () => {
-		const { jpycMCPClient } = await import("@/lib/mcp/client");
+		const { jpycMCPClient } = await import("@/lib/mastra/mcp/client");
 		const tools = await jpycMCPClient.getTools();
 		// biome-ignore lint/suspicious/noExplicitAny: MCPツールの型とMastraツールの型の互換性の問題
 		return tools as any;

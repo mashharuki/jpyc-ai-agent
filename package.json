@@ -19,6 +19,7 @@
 		"@mastra/core": "^0.23.3",
 		"@mastra/mcp": "^0.14.1",
 		"@modelcontextprotocol/sdk": "^1.0.4",
+		"@jpyc/sdk-core": "workspace:*",
 		"@types/node": "^22.10.0",
 		"@types/react": "^19.0.1",
 		"@types/react-dom": "^19.0.1",
