@@ -1,55 +1,83 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { jpycAgent } from '@/lib/mastra/agent';
+import { jpycAgent } from "@/lib/mastra/agent";
+import type { NextRequest } from "next/server";
 
+/**
+ * AI AgentのAPIを呼び出すエンドポイント
+ * @param req
+ * @returns
+ */
 export async function POST(req: NextRequest) {
-  try {
-    const { message, conversationId, profile, friends } = await req.json();
+	try {
+		// リクエストパラメータからメッセージ、会話ID、プロフィール、友達リストを取得
+		const { message, conversationId, profile, friends } = await req.json();
 
-    if (!message) {
-      return NextResponse.json(
-        { success: false, error: 'Message is required' },
-        { status: 400 }
-      );
-    }
+		if (!message) {
+			return new Response(
+				JSON.stringify({ success: false, error: "Message is required" }),
+				{
+					status: 400,
+					headers: { "Content-Type": "application/json" },
+				},
+			);
+		}
 
-    // プロフィールと友達リストをコンテキストとして追加
-    let contextMessage = message;
-    if (profile || (friends && friends.length > 0)) {
-      let context = '\n\n[ユーザー情報]\n';
+		// プロフィールと友達リストをコンテキストとして追加
+		let contextMessage = message;
+		if (profile || (friends && friends.length > 0)) {
+			let context = "\n\n[ユーザー情報]\n";
 
-      if (profile) {
-        context += `- 自分の名前: ${profile.name}\n`;
-        context += `- 自分のアドレス: ${profile.address}\n`;
-      }
+			if (profile) {
+				context += `- 自分の名前: ${profile.name}\n`;
+				context += `- 自分のアドレス: ${profile.address}\n`;
+			}
 
-      if (friends && friends.length > 0) {
-        context += '\n[友達リスト]\n';
-        friends.forEach((friend: { name: string; address: string }) => {
-          context += `- ${friend.name}: ${friend.address}\n`;
-        });
-      }
+			if (friends && friends.length > 0) {
+				context += "\n[友達リスト]\n";
+				for (const friend of friends) {
+					context += `- ${friend.name}: ${friend.address}\n`;
+				}
+			}
 
-      contextMessage = message + context;
-    }
+			contextMessage = message + context;
+		}
 
-    const response = await jpycAgent.generate(contextMessage, {
-      // conversationIdがある場合は渡す
-      ...(conversationId && { conversationId }),
-    });
+		// Mastraで定義したJPYC AI Agentの機能を呼び出す
+		const response = await jpycAgent.generate(contextMessage, {
+			...(conversationId && { conversationId }),
+		});
 
-    return NextResponse.json({
-      success: true,
-      response: response.text || JSON.stringify(response),
-      conversationId: conversationId || 'default',
-    });
-  } catch (error: any) {
-    console.error('Chat API Error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error.message || 'An error occurred while processing your request'
-      },
-      { status: 500 }
-    );
-  }
+		console.log("Full generate response:", JSON.stringify(response, null, 2));
+		console.log("Generate response summary:", {
+			text: response.text,
+			textLength: response.text?.length,
+			object: response.object,
+			steps: response.steps?.length,
+			toolResults: response.toolResults?.length,
+		});
+
+		// レスポンステキストを返す
+		return new Response(
+			response.text || "エージェントからの応答がありませんでした",
+			{
+				headers: {
+					"Content-Type": "text/plain; charset=utf-8",
+				},
+			},
+		);
+	} catch (error) {
+		console.error("Chat API Error:", error);
+		return new Response(
+			JSON.stringify({
+				success: false,
+				error:
+					error instanceof Error
+						? error.message
+						: "An error occurred while processing your request",
+			}),
+			{
+				status: 500,
+				headers: { "Content-Type": "application/json" },
+			},
+		);
+	}
 }

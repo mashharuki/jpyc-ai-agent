@@ -41,7 +41,7 @@ JPYC AI Agentは、チャットで指示を送るだけでJPYC（日本円ステ
 ### 1. 環境変数のテンプレートファイルを作成する
 
 ```bash
-cp .env.example .env.local
+cp .env.local.example .env.local
 ```
 
 セットアップが必要な環境変数は以下の通り：
@@ -51,8 +51,12 @@ cp .env.example .env.local
 # ⚠️ 本番環境では絶対に使用しないでください！テストネット専用です
 PRIVATE_KEY=0x... # テストネット用の秘密鍵
 
-# AI API Keys
+# AI API Keys(自分の使いたいモデルに必要なAPIキーをセットしてください。 ※ Claudeを推奨)
 OPENAI_API_KEY=sk-proj-... # OpenAI APIキー
+GOOGLE_GENERATIVE_AI_API_KEY= # Gemini APIキー
+ANTHROPIC_API_KEY= # Claude APIキー
+# JPYC MCPサーバーURL
+JPYC_MCP_SERVER_URL="http://localhost:3001/sse"
 ```
 
 ### 2. OpenAI APIキーを発行すること
@@ -115,6 +119,12 @@ git clone --recurse-submodules https://github.com/YOUR_USERNAME/jpyc-ai-agent.gi
 cd jpyc-ai-agent
 ```
 
+### クローンした後に git submodulesを追加するコマンド
+
+```bash
+git submodule update --init --recursive
+```
+
 ### インストール
 
 ```bash
@@ -131,11 +141,23 @@ pnpm build
 
 ### 起動
 
+**必ずビルドした後に実行してください！**
+
+まずJPYC MCP サーバーを起動させます。
+
 ```bash
-pnpm dev
+pnpm run mcp:dev
 ```
 
-ブラウザで `http://localhost:3000` にアクセス
+これで、 `http://localhost:3001` でJPYC MCPサーバーが立ち上がります。
+
+この状態でWebアプリを起動させます。
+
+```bash
+pnpm run dev
+```
+
+アプリケーションが `http://localhost:3000` で起動します。
 
 **もしAIチャットの出力がオブジェクト形式になっている場合は `src/lib/mastra/agent.ts`で使用しているモデルを別のもの(geminiなど)に切り替えてみてください。**
 

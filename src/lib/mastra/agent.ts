@@ -1,65 +1,29 @@
-// @ts-nocheck - Mastra 0.23.3のAPI変更により型定義が異なるため
-import { Agent } from '@mastra/core';
-import { createOpenAI } from '@ai-sdk/openai';
+import { Agent } from "@mastra/core/agent";
+import { claude } from "./model";
 
-import { switchChainTool } from '@/mcp-server/tools/switchChain';
-import { getCurrentChainTool } from '@/mcp-server/tools/getCurrentChain';
-import { transferTool } from '@/mcp-server/tools/transfer';
-import { balanceTool } from '@/mcp-server/tools/balance';
-import { totalSupplyTool } from '@/mcp-server/tools/totalSupply';
-
-// Mastra用のOpenAIプロバイダーを作成
-const openai = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-// gpt-4o-miniモデルを使用（安価で高速、推論トークンなし）
-const gpt4oMiniModel = openai('gpt-4o-mini');
-
+/**
+ * JPYC エージェント
+ *
+ * MCP経由でJPYC SDKツールを使用するエージェント
+ *
+ * 学習用ポイント:
+ * - tools は動的関数として定義
+ * - MCPClientから getTools() でツールを取得
+ * - 循環参照を避けるため、動的インポートを使用
+ */
 export const jpycAgent = new Agent({
-  name: 'JPYC Assistant',
-  description: 'JPYCトークンの操作をサポートするAIアシスタント（マルチチェーン対応）',
-  // @ts-ignore
-  model: gpt4oMiniModel,
-  // model: google('gemini-2.5-flash'),
-  tools: [
-    {
-      name: switchChainTool.name,
-      description: switchChainTool.description,
-      // @ts-ignore
-      parameters: switchChainTool.inputSchema,
-      execute: switchChainTool.execute,
-    },
-    {
-      name: getCurrentChainTool.name,
-      description: getCurrentChainTool.description,
-      // @ts-ignore
-      parameters: getCurrentChainTool.inputSchema,
-      execute: getCurrentChainTool.execute,
-    },
-    {
-      name: transferTool.name,
-      description: transferTool.description,
-      // @ts-ignore
-      parameters: transferTool.inputSchema,
-      execute: transferTool.execute,
-    },
-    {
-      name: balanceTool.name,
-      description: balanceTool.description,
-      // @ts-ignore
-      parameters: balanceTool.inputSchema,
-      execute: balanceTool.execute,
-    },
-    {
-      name: totalSupplyTool.name,
-      description: totalSupplyTool.description,
-      // @ts-ignore
-      parameters: totalSupplyTool.inputSchema,
-      execute: totalSupplyTool.execute,
-    },
-  ],
-  instructions: `
+	name: "JPYC Assistant",
+	description:
+		"JPYCトークンの操作をサポートするAIアシスタント（マルチチェーン対応）",
+	model: claude,
+	// MCPClient経由でツールを動的に取得
+	tools: async () => {
+		const { jpycMCPClient } = await import("@/lib/mastra/mcp/client");
+		const tools = await jpycMCPClient.getTools();
+		// biome-ignore lint/suspicious/noExplicitAny: MCPツールの型とMastraツールの型の互換性の問題
+		return tools as any;
+	},
+	instructions: `
 あなたはJPYC（日本円ステーブルコイン）の操作をサポートするAIアシスタントです。
 
 対応テストネット: Ethereum Sepolia, Avalanche Fuji
