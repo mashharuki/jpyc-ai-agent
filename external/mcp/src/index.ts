@@ -10,6 +10,7 @@
  * 3. 実際のMCPプロトコルの使い方を学習
  */
 
+import "dotenv/config";
 import { MCPServer } from "@mastra/mcp";
 import http from "node:http";
 import { jpycTools } from "./tools";

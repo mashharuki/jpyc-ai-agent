@@ -100,7 +100,12 @@ function createClients(chain: SupportedChain) {
 	});
 
 	// JPYC SDKインスタンスの作成（送金用に保持）
-	_jpycInstance = new JPYC({ client: _walletClient });
+	_jpycInstance = new JPYC({
+		env: "prod",
+		contractType: "jpycPrepaid",
+		localContractAddress: undefined,
+		client: _walletClient,
+	});
 }
 
 /**

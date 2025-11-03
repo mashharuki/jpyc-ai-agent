@@ -1,51 +1,15 @@
-import { JPYC } from "@jpyc/sdk-core";
-import {
-	type Chain,
-	createPublicClient,
-	createWalletClient,
-	formatUnits,
-	type Hex,
-	http,
-	parseUnits,
-} from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { avalancheFuji, polygonAmoy, sepolia } from "viem/chains";
-
-// ERC20 ABI（必要な関数のみ）
-const ERC20_ABI = [
-	{
-		inputs: [],
-		name: "totalSupply",
-		outputs: [{ name: "", type: "uint256" }],
-		stateMutability: "view",
-		type: "function",
-	},
-	{
-		inputs: [{ name: "account", type: "address" }],
-		name: "balanceOf",
-		outputs: [{ name: "", type: "uint256" }],
-		stateMutability: "view",
-		type: "function",
-	},
-	{
-		inputs: [
-			{ name: "to", type: "address" },
-			{ name: "amount", type: "uint256" },
-		],
-		name: "transfer",
-		outputs: [{ name: "", type: "bool" }],
-		stateMutability: "nonpayable",
-		type: "function",
-	},
-] as const;
+import { JPYC, type IJPYC, SdkClient, type ISdkClient } from "@jpyc/sdk-core";
+import type { Hex } from "viem";
+import type { PrivateKeyAccount } from "viem/accounts";
 
 // サポートするチェーン
 export type SupportedChain = "sepolia" | "amoy" | "fuji";
 
-const CHAIN_MAP: Record<SupportedChain, Chain> = {
-	sepolia: sepolia,
-	amoy: polygonAmoy,
-	fuji: avalancheFuji,
+// JPYC SDKで使用するチェーンIDのマッピング
+const CHAIN_ID_MAP: Record<SupportedChain, number> = {
+	sepolia: 11155111, // Ethereum Sepolia
+	amoy: 80002, // Polygon Amoy
+	fuji: 43113, // Avalanche Fuji
 };
 
 const CHAIN_NAMES: Record<SupportedChain, string> = {
@@ -61,68 +25,57 @@ const RPC_URLS: Record<SupportedChain, string> = {
 	fuji: "https://api.avax-test.network/ext/bc/C/rpc",
 };
 
-// JPYCコントラクトアドレス（全テストネット共通）
-const JPYC_CONTRACT_ADDRESS: Hex = "0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB";
-
 // 現在選択されているチェーン（デフォルトはSepolia）
 let _currentChain: SupportedChain = "sepolia";
-let _jpycInstance: JPYC | null = null;
-let _account: ReturnType<typeof privateKeyToAccount> | null = null;
-let _publicClient: ReturnType<typeof createPublicClient> | null = null;
-let _walletClient: ReturnType<typeof createWalletClient> | null = null;
+let _jpycInstance: IJPYC | null = null;
+let _account: PrivateKeyAccount | null = null;
 
 /**
- * チェーンに接続するためのクライアントインスタンスを生成するメソッド
+ * JPYC SDKインスタンスを生成するメソッド
  * @param chain
  */
-function createClients(chain: SupportedChain) {
+function createJpycInstance(chain: SupportedChain) {
 	// 環境変数の検証
 	if (!process.env.PRIVATE_KEY) {
 		throw new Error("PRIVATE_KEY environment variable is required");
 	}
 
-	// アカウントの作成（初回のみ）
-	if (!_account) {
-		_account = privateKeyToAccount(process.env.PRIVATE_KEY as Hex);
-	}
+	const chainId = CHAIN_ID_MAP[chain];
 
-	// PublicClientの作成（読み取り専用操作用）
-	_publicClient = createPublicClient({
-		chain: CHAIN_MAP[chain],
-		transport: http(RPC_URLS[chain]),
+	// SdkClientの初期化
+	const sdkClient: ISdkClient = new SdkClient({
+		chainId,
+		rpcUrl: RPC_URLS[chain],
 	});
 
-	// WalletClientの作成（トランザクション送信用）
-	_walletClient = createWalletClient({
+	// アカウントの作成
+	_account = sdkClient.configurePrivateKeyAccount({
+		privateKey: process.env.PRIVATE_KEY as Hex,
+	});
+
+	// Clientの生成
+	const client = sdkClient.configureClient({
 		account: _account,
-		chain: CHAIN_MAP[chain],
-		transport: http(RPC_URLS[chain]),
 	});
 
-	// JPYC SDKインスタンスの作成（送金用に保持）
-	_jpycInstance = new JPYC({ client: _walletClient });
+	// JPYC SDKインスタンスの作成
+	_jpycInstance = new JPYC({
+		env: "prod",
+		contractType: "jpycPrepaid",
+		localContractAddress: undefined,
+		client,
+	});
 }
 
 /**
- * パブリッククライアントインスタンスを取得するメソッド
+ * JPYC SDKインスタンスを取得するメソッド
  * @returns
  */
-function getPublicClient() {
-	if (!_publicClient) {
-		createClients(_currentChain);
+function getJpycInstance(): IJPYC {
+	if (!_jpycInstance) {
+		createJpycInstance(_currentChain);
 	}
-	return _publicClient!;
-}
-
-/**
- * ウォレットクライアントインスタンスを取得するメソッド
- * @returns
- */
-function getWalletClient() {
-	if (!_walletClient) {
-		createClients(_currentChain);
-	}
-	return _walletClient!;
+	return _jpycInstance!;
 }
 
 /**
@@ -130,14 +83,14 @@ function getWalletClient() {
  * @param chain
  */
 export function switchChain(chain: SupportedChain): void {
-	if (!CHAIN_MAP[chain]) {
+	if (!CHAIN_ID_MAP[chain]) {
 		throw new Error(
 			`Unsupported chain: ${chain}. Supported chains: sepolia, amoy, fuji`,
 		);
 	}
 	_currentChain = chain;
-	// クライアントを再作成
-	createClients(chain);
+	// JPYC SDKインスタンスを再作成
+	createJpycInstance(chain);
 }
 
 /**
@@ -163,17 +116,15 @@ export function getChainName(chain?: SupportedChain): string {
  * @returns
  */
 export function getCurrentAddress(): Hex {
-	if (!process.env.PRIVATE_KEY) {
-		throw new Error("PRIVATE_KEY environment variable is required");
-	}
 	if (!_account) {
-		_account = privateKeyToAccount(process.env.PRIVATE_KEY as Hex);
+		// アカウントが未初期化の場合、JPYC SDKインスタンスを初期化
+		getJpycInstance();
 	}
-	return _account.address;
+	return _account!.address;
 }
 
 /**
- * JPYC操作インターフェース（viemで直接実装）
+ * JPYC操作インターフェース（JPYC SDKを使用）
  */
 export const jpyc = {
 	/**
@@ -182,15 +133,11 @@ export const jpyc = {
 	 */
 	async totalSupply(): Promise<string> {
 		try {
-			const publicClient = getPublicClient();
-			// viemを使ってコントラクトのtotalSupply関数を呼び出す
-			const result = await publicClient.readContract({
-				address: JPYC_CONTRACT_ADDRESS,
-				abi: ERC20_ABI,
-				functionName: "totalSupply",
-			});
-			// BigIntを18桁の小数点フォーマットに変換
-			return formatUnits(result, 18);
+			const jpycInstance = getJpycInstance();
+			// JPYC SDKのtotalSupply関数を呼び出す
+			const result = await jpycInstance.totalSupply();
+			// numberをstringに変換して返す
+			return result.toString();
 		} catch (error: any) {
 			console.error("[jpyc.totalSupply] Error:", error);
 
@@ -217,16 +164,11 @@ export const jpyc = {
 	 */
 	async balanceOf(params: { account: Hex }): Promise<string> {
 		try {
-			const publicClient = getPublicClient();
-			// viemを使ってコントラクトのbalanceOf関数を呼び出す
-			const result = await publicClient.readContract({
-				address: JPYC_CONTRACT_ADDRESS,
-				abi: ERC20_ABI,
-				functionName: "balanceOf",
-				args: [params.account],
-			});
-			// BigIntを18桁の小数点フォーマットに変換
-			return formatUnits(result, 18);
+			const jpycInstance = getJpycInstance();
+			// JPYC SDKのbalanceOf関数を呼び出す
+			const result = await jpycInstance.balanceOf({ account: params.account });
+			// numberをstringに変換して返す
+			return result.toString();
 		} catch (error: any) {
 			console.error("[jpyc.balanceOf] Error:", error);
 
@@ -253,23 +195,12 @@ export const jpyc = {
 	 */
 	async transfer(params: { to: Hex; value: number }): Promise<string> {
 		try {
-			const walletClient = getWalletClient();
-
-			if (!walletClient.account) {
-				throw new Error("Wallet client account is not initialized");
-			}
-
-			// numberを18桁のBigIntに変換
-			const amount = parseUnits(params.value.toString(), 18);
-
-			// walletClient.accountを使用（既にアカウント情報を持っている）
-			const hash = await walletClient.writeContract({
-				address: JPYC_CONTRACT_ADDRESS,
-				abi: ERC20_ABI,
-				functionName: "transfer",
-				args: [params.to, amount],
-				account: walletClient.account,
-				chain: CHAIN_MAP[_currentChain],
+			const jpycInstance = getJpycInstance();
+			// JPYC SDKのtransfer関数を呼び出す
+			// SDKはnumberを受け取り、内部で適切に変換する
+			const hash = await jpycInstance.transfer({
+				to: params.to,
+				value: params.value,
 			});
 
 			return hash;
