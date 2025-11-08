@@ -8,7 +8,7 @@
 
 自然言語でJPYCトークンを操作できるAIチャットアプリケーション
 
-![デモ画面](./public/demo_image.png)
+![デモ画面](./pkgs/frontend/public/demo_image.png)
 
 ---
 
@@ -36,9 +36,15 @@ JPYC AI Agentは、チャットで指示を送るだけでJPYC（日本円ステ
 - ワンクリックでトランザクション詳細を確認可能
 
 ### AIアシスタント機能
-- OpenAI gpt-4o-mini による自然言語解釈
+- Claude (Anthropic) による自然言語解釈（推奨）
+- OpenAI GPT-4o-mini / Google Gemini にも対応
 - Mastra フレームワークでツール統合
 - MCP (Model Context Protocol) でブロックチェーン操作
+
+### ソーシャル機能
+- 友達リストを登録して名前で送金可能
+- 「太郎に100JPYC送って」のような自然な指示が可能
+- プロフィール管理機能
 
 ---
 
@@ -47,6 +53,7 @@ JPYC AI Agentは、チャットで指示を送るだけでJPYC（日本円ステ
 ### 1. 環境変数のテンプレートファイルを作成する
 
 ```bash
+cd pkgs/frontend
 cp .env.local.example .env.local
 ```
 
@@ -60,33 +67,53 @@ PRIVATE_KEY=0x... # テストネット用の秘密鍵
 # AI API Keys(自分の使いたいモデルに必要なAPIキーをセットしてください。 ※ Claudeを推奨)
 OPENAI_API_KEY=sk-proj-... # OpenAI APIキー
 GOOGLE_GENERATIVE_AI_API_KEY= # Gemini APIキー
-ANTHROPIC_API_KEY= # Claude APIキー
+ANTHROPIC_API_KEY= # Claude APIキー（推奨）
 # JPYC MCPサーバーURL
 JPYC_MCP_SERVER_URL="http://localhost:3001/sse"
 ```
 
-### 2. OpenAI APIキーを発行すること
+### 2. AI APIキーを発行する
 
-[OpenAI Platform](https://platform.openai.com/) にアクセスしてAPIキーを発行してください。
+#### Claude APIキー（推奨）
 
-#### OpenAI APIキーの設定例
+[Anthropic Console](https://console.anthropic.com/) にアクセスしてAPIキーを発行してください。
 
-1. **OpenAI Platform にアクセス**
-   - https://platform.openai.com/ にアクセス
+1. **Anthropic Console にアクセス**
+   - https://console.anthropic.com/ にアクセス
 
 2. **アカウントを作成またはログイン**
    - 新規の場合はサインアップ
 
 3. **API Keysセクションで新しいキーを作成**
-   - ダッシュボード → API Keys → Create new secret key
+   - Settings → API Keys → Create Key
 
 4. **生成されたAPIキーを取得する**
-   - `sk-proj-...` の形式のキーをコピー
+   - `sk-ant-...` の形式のキーをコピー
 
 5. **APIキーを環境変数に設定**
    ```bash
+   ANTHROPIC_API_KEY=sk-ant-...
+   ```
+
+#### OpenAI APIキー（代替）
+
+[OpenAI Platform](https://platform.openai.com/) にアクセスしてAPIキーを発行してください。
+
+1. **OpenAI Platform にアクセス**
+   - https://platform.openai.com/ にアクセス
+
+2. **アカウントを作成またはログイン**
+
+3. **API Keysセクションで新しいキーを作成**
+
+4. **APIキーを環境変数に設定**
+   ```bash
    OPENAI_API_KEY=sk-proj-...
    ```
+
+#### Google Gemini APIキー（代替）
+
+[Google AI Studio](https://aistudio.google.com/) にアクセスしてAPIキーを発行してください。
 
 ### 3. テストネット用ウォレットの秘密鍵を設定する
 
@@ -121,7 +148,7 @@ JPYC_MCP_SERVER_URL="http://localhost:3001/sse"
 ### リポジトリのクローン
 
 ```bash
-git clone --recurse-submodules https://github.com/YOUR_USERNAME/jpyc-ai-agent.git
+git clone --recurse-submodules https://github.com/mashharuki/jpyc-ai-agent.git
 cd jpyc-ai-agent
 ```
 
@@ -133,11 +160,13 @@ git submodule update --init --recursive
 
 ### インストール
 
+このプロジェクトは **pnpm ワークスペース** で管理されています。
+
 ```bash
 pnpm install
 ```
 
-JPYC SDKはGit submoduleとして`external/jpyc-sdk`に配置されています。
+JPYC SDKはGit submoduleとして`pkgs/jpyc-sdk`に配置されています。
 
 ### ビルド
 
@@ -160,12 +189,12 @@ pnpm run mcp:dev
 この状態でWebアプリを起動させます。
 
 ```bash
-pnpm run dev
+pnpm --filter frontend dev
 ```
 
 アプリケーションが `http://localhost:3000` で起動します。
 
-**もしAIチャットの出力がオブジェクト形式になっている場合は `src/lib/mastra/agent.ts`で使用しているモデルを別のもの(geminiなど)に切り替えてみてください。**
+**もしAIチャットの出力がオブジェクト形式になっている場合は `pkgs/frontend/src/lib/mastra/agent.ts`で使用しているモデルを別のもの(OpenAIやGeminiなど)に切り替えてみてください。**
 
 ---
 
@@ -229,51 +258,71 @@ pnpm run dev
 トランザクションは[こちらで確認](https://sepolia.etherscan.io/tx/0x...)できます
 ```
 
+#### 7. 友達に送金
+
+```
+ユーザー: 太郎に100JPYC送って
+アシスタント: 太郎さん（0x742d35Cc...）に 100 JPYC送りました！
+トランザクションは[こちらで確認](https://sepolia.etherscan.io/tx/0x...)できます
+```
+
 ---
 
 ## 🏗️ プロジェクト構造
 
+このプロジェクトは **pnpm ワークスペース** によるモノレポ構成です。
+
 ```
 jpyc-ai-agent/
-├── src/
-│   ├── app/                          # Next.js App Router
-│   │   ├── api/
-│   │   │   ├── chat/route.ts        # チャットAPIエンドポイント
-│   │   │   └── chain/route.ts       # チェーン情報取得API
-│   │   ├── layout.tsx               # ルートレイアウト
-│   │   ├── page.tsx                 # トップページ
-│   │   └── globals.css              # グローバルスタイル
+├── pkgs/
+│   ├── frontend/                       # Next.js フロントエンド
+│   │   ├── src/
+│   │   │   ├── app/                    # Next.js App Router
+│   │   │   │   ├── api/
+│   │   │   │   │   ├── chat/route.ts  # チャットAPIエンドポイント
+│   │   │   │   │   ├── chain/route.ts # チェーン情報取得API
+│   │   │   │   │   ├── address/route.ts # アドレス取得API
+│   │   │   │   │   ├── friends/route.ts # 友達リストAPI
+│   │   │   │   │   └── profile/route.ts # プロフィールAPI
+│   │   │   │   ├── layout.tsx         # ルートレイアウト
+│   │   │   │   ├── page.tsx           # トップページ
+│   │   │   │   └── globals.css        # グローバルスタイル
+│   │   │   │
+│   │   │   ├── components/
+│   │   │   │   └── ChatInterface.tsx  # チャットUIコンポーネント
+│   │   │   │
+│   │   │   └── lib/
+│   │   │       ├── mastra/
+│   │   │       │   ├── agent.ts       # ★ Mastra AIエージェント定義
+│   │   │       │   ├── model/         # AIモデル設定
+│   │   │       │   └── mcp/           # MCPクライアント
+│   │   │       ├── jpyc/
+│   │   │       │   └── sdk.ts         # JPYC SDK ラッパー
+│   │   │       └── storage/           # ローカルストレージ管理
+│   │   │
+│   │   ├── public/
+│   │   │   └── demo_image.png         # デモ画像
+│   │   ├── .env.local                 # 環境変数（Gitに含めない）
+│   │   ├── .env.local.example         # 環境変数テンプレート
+│   │   └── package.json
 │   │
-│   ├── components/
-│   │   └── ChatInterface.tsx        # チャットUIコンポーネント
+│   ├── mcp/                            # ★★ MCP サーバー実装
+│   │   ├── src/
+│   │   │   ├── index.ts               # MCPサーバーエントリーポイント
+│   │   │   ├── tools.ts               # ★★★ MCPツール定義
+│   │   │   └── jpyc/
+│   │   │       └── sdk.ts             # JPYC SDK インスタンス
+│   │   └── package.json
 │   │
-│   ├── lib/
-│   │   ├── mastra/
-│   │   │   └── agent.ts             # ★ Mastra AIエージェント定義
-│   │   └── jpyc/
-│   │       └── sdk.ts               # ★ JPYC SDK ラッパー（viem統合）
-│   │
-│   └── mcp-server/                  # ★★ MCP サーバー実装
-│       ├── index.ts                 # MCPサーバーエントリーポイント
-│       ├── types.ts                 # スキーマ定義
-│       └── tools/                   # ★★★ MCPツール定義
-│           ├── balance.ts           # 残高照会ツール
-│           ├── totalSupply.ts       # 総供給量照会ツール
-│           ├── transfer.ts          # 送信ツール
-│           ├── switchChain.ts       # チェーン切り替えツール
-│           └── getCurrentChain.ts   # 現在のチェーン取得ツール
+│   └── jpyc-sdk/                       # JPYC SDK（git submodule）
+│       └── packages/
+│           ├── core/                   # JPYC SDK Core
+│           └── react/                  # JPYC SDK React
 │
-├── external/
-│   └── jpyc-sdk/                    # JPYC SDK（git submodule）
-│
-├── public/
-│   └── demo_image.png               # デモ画像
-│
-├── .env.local                       # 環境変数（Gitに含めない）
-├── .env.example                     # 環境変数テンプレート
-├── package.json
-├── PROJECT_ARCHITECTURE.md          # 詳細なアーキテクチャドキュメント
-├── KNOWN_ISSUES.md                  # 既知の問題
+├── pnpm-workspace.yaml                 # pnpm ワークスペース設定
+├── package.json                        # ルート package.json
+├── biome.json                          # コードフォーマッター設定
+├── AGENTS.md                           # AI駆動開発ガイドライン
 └── README.md
 ```
 
@@ -294,15 +343,15 @@ jpyc-ai-agent/
 
 **MCP**は、AIモデルが外部ツールを呼び出すための標準化されたプロトコルです。
 
-このプロジェクトでは、5つのMCPツールを実装：
+このプロジェクトでは、以下のMCPツールを実装：
 
 | ツール名 | 機能 | 説明 |
 |---------|------|------|
 | `jpyc_transfer` | トークン送信 | 指定したアドレスにJPYCを送信 |
-| `jpyc_balance` | 残高照会 | アドレスのJPYC残高を確認 |
+| `jpyc_balance` | 残高照会 | アドレスのJPYC残高を確認（省略時は自分の残高） |
 | `jpyc_total_supply` | 総供給量照会 | JPYCの総供給量を確認 |
-| `jpyc_switch_chain` | チェーン切り替え | テストネットを変更 |
-| `jpyc_get_current_chain` | 現在のチェーン取得 | 現在選択中のチェーンを取得 |
+| `jpyc_switch_chain` | チェーン切り替え | テストネットを変更（sepolia/fuji） |
+| `jpyc_get_current_chain` | 現在のチェーン取得 | 現在選択中のチェーンとアドレスを取得 |
 
 ### データフロー
 
@@ -315,28 +364,41 @@ API(/api/chat) にPOSTリクエスト
     ↓
 Mastra Agent が自然言語を解釈
     ↓
-OpenAI gpt-4o-mini が適切なツールを選択
+Claude (Anthropic) が適切なツールを選択
     ↓
-MCPツール実行 (transferTool)
+MCP Client → MCP Server (HTTP/SSE) に接続
+    ↓
+MCPツール実行 (jpyc_transfer)
     ↓
 JPYC SDK (viem) でブロックチェーン操作
     ↓
 トランザクション送信 → 結果をユーザーに返す
 ```
 
-詳細なアーキテクチャは [PROJECT_ARCHITECTURE.md](./PROJECT_ARCHITECTURE.md) を参照してください。
-
 ### JPYC SDKについて
 
 このプロジェクトでは、JPYC SDK Coreをsubmoduleとして統合しています：
 
 - **リポジトリ**: https://github.com/jcam1/sdks (develop branch)
-- **配置場所**: `external/jpyc-sdk/packages/core`
+- **配置場所**: `pkgs/jpyc-sdk/packages/core`
 - **ビルドスクリプト**: `pnpm build`実行時に自動でコンパイル
 - **利点**:
   - 公式SDKの全機能が利用可能
   - ソースコードから直接ビルドするため最新の機能に対応
   - カスタマイズが容易
+
+### MCP Serverについて
+
+このプロジェクトでは、独立したMCPサーバーを実装しています：
+
+- **配置場所**: `pkgs/mcp`
+- **起動コマンド**: `pnpm run mcp:dev`
+- **通信方式**: HTTP/SSE (Server-Sent Events)
+- **ポート**: 3001
+- **利点**:
+  - フロントエンドとバックエンドの分離
+  - MCPプロトコルの実装を学習できる
+  - 他のプロジェクトからも再利用可能
 
 ---
 
@@ -363,27 +425,49 @@ JPYC SDK (viem) でブロックチェーン操作
 - 本番環境の秘密鍵を絶対に使用しないでください
 - `.env.local` はリポジトリにコミットしないでください（`.gitignore`に追加済み）
 
-## 📚 参考文献・リソース
+## � 開発用コマンド
 
-### ドキュメント
-- [プロジェクトアーキテクチャ](./PROJECT_ARCHITECTURE.md) - 詳細な技術ドキュメント
-- [既知の問題](./KNOWN_ISSUES.md) - 既知の問題と解決策
+```bash
+# 全体のビルド
+pnpm build
+
+# フロントエンド開発サーバー起動
+pnpm --filter frontend dev
+
+# MCPサーバー開発サーバー起動
+pnpm run mcp:dev
+
+# コードフォーマット
+pnpm format
+
+# フロントエンドのみビルド
+pnpm --filter frontend build
+
+# MCPサーバーのみビルド
+pnpm --filter @jpyc/mcp-server build
+```
+
+---
+
+## 📚 参考文献・リソース
 
 ### JPYC関連
 - [JPYC公式サイト](https://jpyc.jp/)
 - [JPYC SDK GitHub](https://github.com/jcam1/sdks)
 - [JPYC v2 Contracts](https://github.com/jcam1/JPYCv2)
+- [JPYC Faucet](https://faucet.jpyc.jp/)
 
 ### 技術リソース
 - [Mastra Documentation](https://mastra.ai/docs)
+- [Model Context Protocol (MCP)](https://modelcontextprotocol.io/)
+- [Anthropic Claude](https://www.anthropic.com/claude)
 - [OpenAI API Documentation](https://platform.openai.com/docs)
+- [Google AI Studio](https://aistudio.google.com/)
 - [viem Documentation](https://viem.sh/)
 - [Next.js 15 Documentation](https://nextjs.org/docs)
-- [Model Context Protocol (MCP)](https://modelcontextprotocol.io/)
 
 ### ブロックチェーンエクスプローラー
 - [Ethereum Sepolia](https://sepolia.etherscan.io/address/0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB)
-- [Polygon Amoy](https://amoy.polygonscan.com/address/0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB)
 - [Avalanche Fuji](https://testnet.snowtrace.io/address/0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB)
 
 ---
@@ -395,9 +479,23 @@ JPYC SDK (viem) でブロックチェーン操作
 このプロジェクトは現在、**JPYC Prepaid** (`0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB`) に対応しています。
 
 **対応チェーン**:
-- ✅ Ethereum Sepolia
-- ✅ Avalanche Fuji
+- ✅ **Ethereum Sepolia** (推奨・動作確認済み)
+- ✅ **Avalanche Fuji** (動作確認済み)
 - ⚠️ Polygon Amoy（コントラクト未デプロイのため未対応）
+
+### プロジェクト構成の特徴
+
+このプロジェクトは **pnpm ワークスペース** によるモノレポ構成です：
+
+- **`pkgs/frontend`**: Next.js 15 + Mastra + MCP Client
+- **`pkgs/mcp`**: 独立したMCPサーバー（HTTP/SSE）
+- **`pkgs/jpyc-sdk`**: JPYC SDK（git submodule）
+
+この構成により、フロントエンドとバックエンドを分離し、保守性と再利用性を向上させています。
+
+### Git Submoduleについて
+
+現在、資金移動業版のSDKが公開準備中のため、このプロジェクトでは JPYC SDK を **git submodule** として組み込んでいます。
 
 ### JPYC（資金移動業版）について
 
@@ -411,21 +509,20 @@ JPYC SDK (viem) でブロックチェーン操作
 - ✅ Polygon Amoy（Faucet公開後に対応）
 - ✅ Avalanche Fuji
 
-### Git Submoduleについて
-
-現在、資金移動業版のSDKが公開準備中のため、このプロジェクトでは JPYC SDK を **git submodule** として組み込んでいます。
-
 ### JPYCへの移行手順
 
 JPYC（資金移動業版）が公開されたら、以下の手順で移行してください:
 
-1. **コントラクトアドレスを変更** (`src/lib/jpyc/sdk.ts`)
+1. **コントラクトアドレスを変更** (`pkgs/mcp/src/jpyc/sdk.ts`)
    ```typescript
    const JPYC_CONTRACT_ADDRESS: Hex = '0xE7C3D8C9a439feDe00D2600032D5dB0Be71C3c29';
    ```
 
-2. **（Polygon Amoy対応時）AIエージェントの説明を更新** (`src/lib/mastra/agent.ts`)
+2. **（Polygon Amoy対応時）チェーン設定を追加** (`pkgs/mcp/src/jpyc/sdk.ts`)
+   - Polygon Amoyの設定を追加
+
+3. **AIエージェントの説明を更新** (`pkgs/frontend/src/lib/mastra/agent.ts`)
    - 対応テストネットにPolygon Amoyが利用可能であることを明記
 
-3. **動作確認**
+4. **動作確認**
    - 各テストネットで残高照会・送信をテスト
