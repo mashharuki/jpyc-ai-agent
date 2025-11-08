@@ -4,136 +4,103 @@
 
 ```
 jpyc-ai-agent/
-├── src/
-│   ├── app/                      # Next.js App Router
-│   │   ├── layout.tsx            # ルートレイアウト
-│   │   ├── page.tsx              # トップページ
-│   │   ├── globals.css           # グローバルスタイル
-│   │   └── api/                  # API Routes
-│   │       ├── chat/             # チャットエンドポイント（Mastra統合）
-│   │       │   └── route.ts
-│   │       ├── chain/            # チェーン情報取得
-│   │       │   └── route.ts
-│   │       ├── profile/          # プロフィール管理
-│   │       │   └── route.ts
-│   │       ├── address/          # アドレス情報
-│   │       │   └── route.ts
-│   │       └── friends/          # フレンド機能
-│   │           └── route.ts
+├── pkgs/
+│   ├── frontend/                     # Next.js + Mastra + MCP Client
+│   │   ├── src/
+│   │   │   ├── app/                  # App Router と API Routes
+│   │   │   │   ├── api/              # チャット/チェーン/プロフィール等のエンドポイント
+│   │   │   │   ├── layout.tsx
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── globals.css
+│   │   │   ├── components/           # UIコンポーネント（ChatInterfaceなど）
+│   │   │   └── lib/
+│   │   │       ├── mastra/           # エージェント・モデル・MCPクライアント
+│   │   │       ├── jpyc/             # MCP補助ユーティリティ
+│   │   │       └── storage/          # ローカルストレージ抽象化
+│   │   ├── public/
+│   │   ├── package.json
+│   │   └── tsconfig.json
 │   │
-│   ├── components/               # Reactコンポーネント
-│   │   └── ChatInterface.tsx    # チャットUI（メイン）
+│   ├── mcp/                          # 独立したMCPサーバー
+│   │   ├── src/
+│   │   │   ├── index.ts             # HTTP/SSE + MCP Server
+│   │   │   ├── tools.ts             # ツール定義
+│   │   │   └── jpyc/sdk.ts          # JPYC SDK初期化とチェーン管理
+│   │   ├── package.json
+│   │   └── tsconfig.json
 │   │
-│   └── lib/                      # ビジネスロジック・ユーティリティ
-│       ├── jpyc/
-│       │   └── sdk.ts            # JPYC SDK操作（非推奨・互換性用）
-│       ├── mastra/
-│       │   ├── agent.ts          # Mastraエージェント定義
-│       │   ├── mcp/
-│       │   │   └── client.ts     # MCPクライアント設定
-│       │   └── model/
-│       │       └── index.ts      # AIモデル設定
-│       └── storage/
-│           ├── localStorage.ts   # ローカルストレージ抽象化
-│           └── types.ts          # ストレージ型定義
+│   └── jpyc-sdk/                     # Git submodule（@jpyc/sdk-core 等）
+│       └── packages/
+│           ├── core/
+│           └── react/
 │
-├── external/
-│   ├── jpyc-sdk/                 # Git submodule（JPYC SDK）
-│   │   ├── packages/
-│   │   │   ├── core/             # Core SDK
-│   │   │   └── react/            # React Hooks
-│   │   └── docs/                 # ドキュメント
-│   │
-│   └── mcp/                      # MCPサーバー（独立プロセス）
-│       ├── src/
-│       │   ├── index.ts          # HTTPサーバー＋MCP統合
-│       │   ├── tools.ts          # ツール定義エクスポート
-│       │   └── jpyc/
-│       │       └── sdk.ts        # JPYC SDK管理
-│       ├── package.json
-│       └── tsconfig.json
-│
-├── public/                       # 静的ファイル
-│   └── demo_image.png
-│
-├── .vscode/
-│   └── mcp.json                  # MCP設定（VS Code統合）
-│
-├── .env.local.example            # 環境変数テンプレート
-├── AGENTS.md                     # AI駆動開発ガイドライン
-├── README.md                     # プロジェクトドキュメント
-├── package.json                  # 依存関係とスクリプト
-├── pnpm-workspace.yaml           # pnpmワークスペース設定
-├── tsconfig.json                 # TypeScript設定
-├── biome.json                    # Biome設定
-├── next.config.js                # Next.js設定
-├── tailwind.config.ts            # Tailwind CSS設定
-└── postcss.config.js             # PostCSS設定
+├── AGENTS.md                         # AI開発ガイドライン
+├── README.md                         # ルートドキュメント
+├── package.json                      # ルートスクリプト（build等）
+├── pnpm-workspace.yaml               # pnpmワークスペース設定
+├── pnpm-lock.yaml                    # ロックファイル
+├── biome.json                        # Biome設定
+└── .serena/                          # Serenaメモリーファイル
 ```
 
 ## 主要モジュールの役割
 
-### `external/mcp/src/index.ts`
-- **独立したMCPサーバー**
-- HTTP/SSE経由でMCPプロトコルを実装
-- ポート3001でリッスン
-- エンドポイント:
-  - `/sse`: SSE接続
-  - `/message`: メッセージ送信
-  - `/health`: ヘルスチェック
+### `pkgs/mcp/src/index.ts`
+- 独立したMCPサーバー
+- HTTP/SSEでクライアントと通信（デフォルト: ポート3001）
+- `/sse`, `/message`, `/health` エンドポイントを提供
+- 起動時にCORSヘッダーを設定してNext.jsアプリからの接続を許可
 
-### `external/mcp/src/jpyc/sdk.ts`
-- JPYC SDK操作の実装
-- チェーン切り替え、送金、残高照会など
-- グローバル状態管理:
-  - `_jpycInstance`: JPYC SDKインスタンス
-  - `_currentChain`: 現在のチェーン（sepolia/amoy/fuji）
-  - `_account`, `_publicClient`, `_walletClient`
+### `pkgs/mcp/src/jpyc/sdk.ts`
+- JPYC SDK Coreの初期化とチェーン管理
+- シングルトン的にインスタンスを保持し、`switchChain` で状態を更新
+- `getCurrentAddress`, `getCurrentChain`, `jpyc` ラッパーをエクスポート
 
-### `src/lib/mastra/agent.ts`
+### `pkgs/mcp/src/tools.ts`
+- MCPツール定義を一括管理
+- `jpyc_balance`, `jpyc_transfer`, `jpyc_total_supply`, `jpyc_switch_chain`, `jpyc_get_current_chain`
+- エクスプローラーURLの組み立てなど補助処理も担当
+
+### `pkgs/frontend/src/lib/mastra/agent.ts`
 - Mastraエージェント定義
-- OpenAI gpt-4o-miniモデル設定
-- MCPツールとの統合（動的ロード）
-- エージェント指示（instructions）の定義
+- デフォルトモデルは Claude 3.5 Sonnet
+- MCPクライアントから動的にツールを取得し、友達リスト情報を扱う指示を保持
 
-### `src/lib/mastra/mcp/client.ts`
-- MCPクライアント設定
-- MCPサーバーへの接続（http://localhost:3001/sse）
+### `pkgs/frontend/src/lib/mastra/mcp/client.ts`
+- MCPクライアント初期化処理
+- `JPYC_MCP_SERVER_URL` を参照しHTTP/SSEで接続
+- ツール一覧をキャッシュしてMastraへ渡す
 
-### `src/lib/mastra/model/index.ts`
-- AIモデル設定
-- OpenAI（gpt-4o-mini）
-- Google（gemini-2.5-pro）
+### `pkgs/frontend/src/lib/mastra/model/index.ts`
+- Claude / GPT-4o-mini / Gemini のモデル設定
+- `@ai-sdk/*` を利用してMastraに対応するクライアントを構築
 
-### `src/components/ChatInterface.tsx`
-- チャットUIコンポーネント
-- メッセージ履歴管理
-- ストリーミング対応
-- プロフィール・友達リスト管理
+### `pkgs/frontend/src/components/ChatInterface.tsx`
+- チャットUIと状態管理
+- API呼び出しやストリーミングレスポンスのハンドリング
+- プロフィール・友達設定モーダルを内包
 
-### `src/app/api/chat/route.ts`
+### `pkgs/frontend/src/app/api/chat/route.ts`
 - チャットAPIエンドポイント
-- Mastraエージェントを呼び出し
-- プロフィール・友達情報をコンテキストに追加
-- ストリーミングレスポンス（現在デバッグ中）
+- フロントエンドからのリクエストをMastraエージェントに委譲
+- プロフィール・友達情報をメッセージ末尾に付与
 
-### `src/lib/storage/localStorage.ts`
+### `pkgs/frontend/src/lib/storage/localStorage.ts`
 - ローカルストレージ抽象化
-- プロフィール管理（名前・アドレス）
-- 友達リスト管理
-- 型安全なストレージ操作
+- プロフィール・友達リストの読み書きを型安全に実装
+- 追加のユーティリティ型は `pkgs/frontend/src/lib/storage/types.ts`
 
 ## 依存関係の流れ
 
 ### MCPベースのフロー（現在の実装）
 1. ユーザーがチャットUIで入力
-2. `ChatInterface.tsx` → `/api/chat` エンドポイント
-3. `/api/chat/route.ts` → Mastraエージェント
-4. Mastraエージェント → MCPクライアント → MCPサーバー
-5. MCPサーバー → JPYC SDK (`external/mcp/src/jpyc/sdk.ts`)
-6. JPYC SDK → ブロックチェーン
+2. `ChatInterface.tsx` が `/api/chat` にリクエスト送信
+3. `/api/chat/route.ts` が Mastra エージェントを実行
+4. エージェント → MCPクライアント → MCPサーバー
+5. MCPサーバー (`pkgs/mcp`) が JPYC SDK (`pkgs/mcp/src/jpyc/sdk.ts`) を呼び出し
+6. JPYC SDK がブロックチェーンと通信し結果を返す
 
-### 重要な変更点
-- MCPサーバーが独立プロセスとして動作
-- `src/lib/jpyc/sdk.ts` は互換性用（非推奨）
-- 実際のSDK操作は `external/mcp/src/jpyc/sdk.ts` で実施
+### 重要なポイント
+- MCPサーバーとフロントエンドをプロセス分離（セキュリティ向上）
+- `pkgs/frontend/src/lib/jpyc/sdk.ts` はフロントエンド補助用で、実際の送金ロジックは MCP 側に集約
+- 追加チェーンに対応する場合は `pkgs/mcp/src/jpyc/sdk.ts` と `pkgs/mcp/src/tools.ts` を更新

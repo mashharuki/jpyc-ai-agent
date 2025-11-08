@@ -4,23 +4,23 @@
 
 ### レイヤー構成（MCP統合版）
 ```
-┌─────────────────────────────────┐
-│   UI Layer (React Components)  │  ← ChatInterface.tsx
-├─────────────────────────────────┤
-│   API Layer (Next.js Routes)   │  ← /api/chat, /api/chain, etc.
-├─────────────────────────────────┤
-│   Agent Layer (Mastra)          │  ← agent.ts
-├─────────────────────────────────┤
-│   MCP Client Layer              │  ← mcp/client.ts
-├─────────────────────────────────┤  HTTP/SSE
-│   MCP Server Layer              │  ← external/mcp/src/index.ts
-├─────────────────────────────────┤
-│   Tool Layer (MCP Tools)        │  ← external/mcp/src/tools.ts
-├─────────────────────────────────┤
-│   SDK Layer (JPYC SDK)          │  ← external/mcp/src/jpyc/sdk.ts
-├─────────────────────────────────┤
-│   Blockchain Layer (viem)       │  ← Ethereum, Polygon, Avalanche
-└─────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│  UI Layer (React Components)            │ ← pkgs/frontend/src/components/ChatInterface.tsx
+├──────────────────────────────────────────┤
+│  API Layer (Next.js Routes)             │ ← pkgs/frontend/src/app/api/*
+├──────────────────────────────────────────┤
+│  Agent Layer (Mastra)                   │ ← pkgs/frontend/src/lib/mastra/agent.ts
+├──────────────────────────────────────────┤
+│  MCP Client Layer                       │ ← pkgs/frontend/src/lib/mastra/mcp/client.ts
+├──────────────────────────────────────────┤  HTTP/SSE
+│  MCP Server Layer                       │ ← pkgs/mcp/src/index.ts
+├──────────────────────────────────────────┤
+│  Tool Layer (MCP Tools)                 │ ← pkgs/mcp/src/tools.ts
+├──────────────────────────────────────────┤
+│  SDK Layer (JPYC SDK Core Wrapper)      │ ← pkgs/mcp/src/jpyc/sdk.ts
+├──────────────────────────────────────────┤
+│  Blockchain Layer (viem + RPC)          │ ← Sepolia / Fuji / Amoy
+└──────────────────────────────────────────┘
 ```
 
 ### プロセス分離
@@ -29,11 +29,11 @@
 
 ## デザインパターン
 
-### 1. シングルトンパターン（SDK管理）
-`external/mcp/src/jpyc/sdk.ts` でグローバル状態を管理:
+### 1. シングルトンパターン（JPYC SDK管理）
+`pkgs/mcp/src/jpyc/sdk.ts` でグローバル状態を管理:
 - `_jpycInstance`: JPYC SDKインスタンス
-- `_currentChain`: 現在のチェーン
-- `_account`, `_publicClient`, `_walletClient`: クライアント群
+- `_currentChain`: 現在のチェーン（デフォルトはsepolia）
+- `_account`: 署名用アカウント（PrivateKeyAccount）
 
 利点:
 - アプリケーション全体で1つのSDKインスタンスを共有
@@ -41,9 +41,9 @@
 - MCPサーバー内でステートフル管理
 
 ### 2. ファクトリーパターン（クライアント生成）
-`createClients()` 関数でチェーン別にクライアントを生成
-- テストネット用のRPC設定
-- チェーンごとのコントラクトアドレス
+`createJpycInstance()` 関数でチェーン別にSDKクライアントを生成
+- RPC URLとチェーンIDを `CHAIN_ID_MAP` / `RPC_URLS` から解決
+- `SdkClient` を構成してJPYCインスタンスを生成
 
 ### 3. MCPツールパターン
 各ブロックチェーン操作を独立したMCPツールとして定義:
@@ -74,7 +74,7 @@ Model Context Protocolによるツール抽象化:
 - SDK層: 低レベルAPI
 
 ### 6. ストレージ抽象化
-`src/lib/storage/` でローカルストレージを抽象化:
+`pkgs/frontend/src/lib/storage/` でローカルストレージを抽象化:
 - 型安全なストレージ操作
 - プロフィール・友達管理
 - 将来的なストレージ実装変更に対応しやすい
@@ -83,13 +83,13 @@ Model Context Protocolによるツール抽象化:
 
 ### Mastra + MCP
 - **Mastra 0.23.3**: エージェントフレームワーク
-  - OpenAI/Google AI統合
-  - ツールオーケストレーション
-  - ストリーミング対応
+  - Claude / GPT-4o-mini / Gemini への切り替えをサポート
+  - MCPツールの自動ディスカバリとオーケストレーション
+  - ストリーミングレスポンスに対応
 - **MCP 0.14.1**: Model Context Protocol
-  - ツール定義の標準化
-  - LLMとツールの疎結合
-  - HTTP/SSE通信
+  - ツール定義の標準化とスキーマバリデーション
+  - HTTP/SSE通信で疎結合に連携
+  - VS Code MCPクライアントとも互換
 
 ### viem
 - 型安全なEthereumクライアント
@@ -98,16 +98,16 @@ Model Context Protocolによるツール抽象化:
 - マルチチェーン対応
 
 ### pnpm workspace
-- モノレポ管理
-- Git submodule（jpyc-sdk）との統合
-- 独立したMCPサーバーパッケージ
+- `pkgs/` 配下の複数パッケージを一元管理
+- Git submodule（`pkgs/jpyc-sdk`）を含む依存関係を整理
+- MCPサーバーやフロントエンドを個別にビルド・実行可能
 
 ## セキュリティ設計
 
 ### 環境変数管理
-- 秘密鍵、APIキーは `.env.local` で管理
-- ハードコード禁止
-- テストネット専用ウォレット使用を推奨
+- 秘密鍵・APIキーは `pkgs/frontend/.env.local` にまとめて設定
+- MCPサーバーは `PRIVATE_KEY` を使用して署名（テストネット専用ウォレット必須）
+- 値のハードコードは禁止
 
 ### プロセス分離によるセキュリティ
 - ブロックチェーン操作: MCPサーバープロセス
@@ -123,28 +123,23 @@ Model Context Protocolによるツール抽象化:
 ## 拡張性の考慮
 
 ### 新しいチェーン追加
-1. `external/mcp/src/jpyc/sdk.ts` の `CHAIN_MAP` に追加
-2. RPC URLとコントラクトアドレスを設定
-3. 既存ツールがそのまま動作
+1. `pkgs/mcp/src/jpyc/sdk.ts` の `CHAIN_ID_MAP` / `RPC_URLS` にエントリを追加
+2. 必要に応じてエクスプローラーURLを `pkgs/mcp/src/tools.ts` に追加
+3. Claudeの指示文 (`pkgs/frontend/src/lib/mastra/agent.ts`) に対応チェーンを追記
 
 ### 新しいツール追加
-1. `external/mcp/src/tools.ts` に新ツール定義を追加
-2. Zodスキーマでパラメータ定義
-3. エージェントが自動的に利用可能
+1. `pkgs/mcp/src/tools.ts` に新ツール定義を追加
+2. 入力スキーマをZodで定義し、必要なSDK操作を実装
+3. エージェントが動的にツール一覧を取得するため、Mastra側の追加設定は不要
 
 ### AIモデルの切り替え
-- `src/lib/mastra/model/index.ts` で設定
-- OpenAI ↔ Gemini の切り替えが容易
+- `pkgs/frontend/src/lib/mastra/model/index.ts` で利用するモデルを切り替え
+- Claude（デフォルト）・OpenAI・Google間の切り替えが容易
 
 ## トラブルシューティング
 
-### 現在のデバッグ課題
-- ストリーミングレスポンスが空になる問題
-- `generate()` メソッドでもテキストが空
-- エージェントがツールを呼び出すがレスポンス生成しない
-
-### デバッグ手法
-1. MCPサーバーのログ確認（ポート3001）
-2. MCPツール呼び出しの確認
-3. エージェントのステップ解析
-4. AIモデルの直接呼び出しテスト
+1. **MCPサーバーの状態を確認**: `pnpm run mcp:dev` のログでツール呼び出しが成功しているか確認。
+2. **ヘルスチェック**: `curl http://localhost:3001/health` が `{ "status": "ok" }` を返すか確認。
+3. **接続設定**: フロントエンドの `JPYC_MCP_SERVER_URL` が実際のサーバーURLと一致しているか確認。
+4. **環境変数**: `PRIVATE_KEY` がテストネット用で残高が十分か、APIキーが有効かを確認。
+5. **チェーン整合性**: `pkgs/mcp/src/jpyc/sdk.ts` のチェーン設定と実際に切り替えたいチェーンが一致しているか検証。

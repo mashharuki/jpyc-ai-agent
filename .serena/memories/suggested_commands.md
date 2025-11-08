@@ -16,12 +16,9 @@ git submodule update --remote
 
 ### 依存関係のインストール
 ```bash
-# 通常のインストール
 pnpm install
-
-# JPYC SDKのビルドも含む（本番ビルド前に必要）
-pnpm --filter @jpyc/sdk-core compile && pnpm install
 ```
+- モノレポ配下の全パッケージを一括でインストール
 
 ## 開発サーバー
 
@@ -33,12 +30,12 @@ pnpm run mcp:dev
 - JPYC SDK操作用のMCPツールを提供
 - **Next.jsアプリを起動する前に必ず起動すること**
 
-### Next.jsアプリ起動
+### フロントエンド（Next.js）起動
 ```bash
-pnpm dev
+pnpm --filter frontend dev
 ```
-- 開発サーバーが起動（デフォルト: http://localhost:3000）
-- ホットリロード有効
+- http://localhost:3000 で開発サーバーが起動
+- `pkgs/frontend` のみを対象にしたホットリロード
 
 ### 両方を同時に起動する場合
 ```bash
@@ -46,7 +43,7 @@ pnpm dev
 pnpm run mcp:dev
 
 # ターミナル2
-pnpm dev
+pnpm --filter frontend dev
 ```
 
 ## ビルド・本番環境
@@ -70,9 +67,9 @@ pnpm start
 
 ### リント
 ```bash
-pnpm lint
+pnpm --filter frontend lint
 ```
-- Next.js標準のESLintルールでチェック
+- Next.js標準ルール（App Router対応）でフロントエンドのみチェック
 
 ### フォーマット
 ```bash
@@ -85,17 +82,19 @@ pnpm format
 ### 環境変数ファイル作成
 ```bash
 cp .env.local.example .env.local
-```
-
-必須の環境変数:
+1. JPYC SDK Core のコンパイル (`@jpyc/sdk-core`)
+2. MCPサーバーのビルド (`@jpyc/mcp-server`)
+3. フロントエンドのビルド (`frontend`)
 - `PRIVATE_KEY`: テストネット用秘密鍵（0xから始まる）
-- `OPENAI_API_KEY`: OpenAI APIキー（sk-proj-から始まる）
-
-オプション:
-- `GOOGLE_GENERATIVE_AI_API_KEY`: Gemini APIキー
-
+### 本番サーバー起動
+```bash
+# ターミナル1（MCPサーバー）
 ## デバッグ
 
+# ターミナル2（Next.js）
+
+```
+- 事前に `pnpm build` を完了させておく
 ### MCPサーバーのログ確認
 MCPサーバーを起動すると、以下のログが表示される:
 ```
