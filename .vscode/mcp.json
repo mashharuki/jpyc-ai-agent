@@ -28,6 +28,13 @@
 		"jpyc:mcp-server": {
 			"type": "sse",
 			"url": "http://localhost:3001/sse"
+		},
+		"awslabs.aws-documentation-mcp-server": {
+      "command": "uvx",
+			"args": ["awslabs.aws-documentation-mcp-server@latest"],
+			"env": {
+				"FASTMCP_LOG_LEVEL": "ERROR"
+			}
 		}
 	}
 }
