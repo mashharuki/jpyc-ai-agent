@@ -1,6 +1,30 @@
 {
 	"inputs": [],
 	"servers": {
+		"context7": {
+			"type": "stdio",
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"]
+		},
+		"sequential-thinking": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"OpenZeppelinSolidityContracts": {
+			"type": "http",
+			"url": "https://mcp.openzeppelin.com/contracts/solidity/mcp"
+		},
+		"serena": {
+			"command": "uvx",
+			"args": [
+				"--from",
+				"git+https://github.com/oraios/serena",
+				"serena",
+				"start-mcp-server",
+				"--context",
+				"ide-assistant"
+			]
+		},
 		"jpyc:mcp-server": {
 			"type": "sse",
 			"url": "http://localhost:3001/sse"
