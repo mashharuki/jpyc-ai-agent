@@ -2,3 +2,4 @@ packages:
   - 'pkgs/jpyc-sdk/packages/*'
   - 'pkgs/mcp'
   - 'pkgs/frontend'
+  - 'pkgs/cdk'

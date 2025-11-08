@@ -5,6 +5,7 @@
 	"scripts": {
 		"mcp": "pnpm --filter mcp",
 		"frontend": "pnpm --filter frontend",
+		"cdk": "pnpm --filter cdk",
 		"mcp:dev": "pnpm --filter @jpyc/mcp-server dev",
 		"build": "pnpm --filter @jpyc/sdk-core compile && pnpm --filter @jpyc/mcp-server build && pnpm --filter frontend build",
 		"format": "pnpm exec biome format --write ."
