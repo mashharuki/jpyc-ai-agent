@@ -1,3 +1,4 @@
 packages:
-  - 'external/jpyc-sdk/packages/*'
-  - 'external/mcp'
+  - 'pkgs/jpyc-sdk/packages/*'
+  - 'pkgs/mcp'
+  - 'pkgs/frontend'
