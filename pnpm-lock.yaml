@@ -14,13 +14,19 @@ importers:
 
   pkgs/cdk:
     dependencies:
-      aws-cdk-lib:
-        specifier: 2.215.0
-        version: 2.215.0(constructs@10.4.3)
       constructs:
         specifier: ^10.0.0
         version: 10.4.3
     devDependencies:
+      '@aws-cdk/aws-apigatewayv2-alpha':
+        specifier: 2.114.1-alpha.0
+        version: 2.114.1-alpha.0(aws-cdk-lib@2.172.0(constructs@10.4.3))(constructs@10.4.3)
+      '@aws-cdk/aws-apigatewayv2-authorizers-alpha':
+        specifier: 2.114.1-alpha.0
+        version: 2.114.1-alpha.0(@aws-cdk/aws-apigatewayv2-alpha@2.114.1-alpha.0(aws-cdk-lib@2.172.0(constructs@10.4.3))(constructs@10.4.3))(aws-cdk-lib@2.172.0(constructs@10.4.3))(constructs@10.4.3)
+      '@aws-cdk/aws-apigatewayv2-integrations-alpha':
+        specifier: 2.114.1-alpha.0
+        version: 2.114.1-alpha.0(@aws-cdk/aws-apigatewayv2-alpha@2.114.1-alpha.0(aws-cdk-lib@2.172.0(constructs@10.4.3))(constructs@10.4.3))(aws-cdk-lib@2.172.0(constructs@10.4.3))(constructs@10.4.3)
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -28,13 +34,16 @@ importers:
         specifier: 22.7.9
         version: 22.7.9
       aws-cdk:
-        specifier: 2.1031.2
-        version: 2.1031.2
+        specifier: 2.172.0
+        version: 2.172.0
+      aws-cdk-lib:
+        specifier: 2.172.0
+        version: 2.172.0(constructs@10.4.3)
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.7.9)(ts-node@10.9.2(@types/node@22.7.9)(typescript@5.6.3))
       ts-jest:
-        specifier: ^29.2.5
+        specifier: ^29.4.5
         version: 29.4.5(@babel/core@7.28.5)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.28.5))(jest-util@29.7.0)(jest@29.7.0(@types/node@22.7.9)(ts-node@10.9.2(@types/node@22.7.9)(typescript@5.6.3)))(typescript@5.6.3)
       ts-node:
         specifier: ^10.9.2
@@ -442,12 +451,37 @@ packages:
   '@aws-cdk/asset-awscli-v1@2.2.242':
     resolution: {integrity: sha512-4c1bAy2ISzcdKXYS1k4HYZsNrgiwbiDzj36ybwFVxEWZXVAP0dimQTCaB9fxu7sWzEjw3d+eaw6Fon+QTfTIpQ==}
 
+  '@aws-cdk/asset-kubectl-v20@2.1.4':
+    resolution: {integrity: sha512-Ps2MkmjYgMyflagqQ4dgTElc7Vwpqj8spw8dQVFiSeaaMPsuDSNsPax3/HjuDuwqsmLdaCZc6umlxYLpL0kYDA==}
+
   '@aws-cdk/asset-node-proxy-agent-v6@2.1.0':
     resolution: {integrity: sha512-7bY3J8GCVxLupn/kNmpPc5VJz8grx+4RKfnnJiO1LG+uxkZfANZG3RMHhE+qQxxwkyQ9/MfPtTpf748UhR425A==}
 
-  '@aws-cdk/cloud-assembly-schema@48.18.0':
-    resolution: {integrity: sha512-KJHmkji59QboUIytK/imIY/ajt/r7OOXdyvZz25e0jssreyyxx9HUswZpcB0BM/9ZkVI7IdzYlotWe6opXdapg==}
-    engines: {node: '>= 18.0.0'}
+  '@aws-cdk/aws-apigatewayv2-alpha@2.114.1-alpha.0':
+    resolution: {integrity: sha512-+urpw7rGrtdGvnHQlDXVfpI3TmQJpjuT9jTOeuuG5dNDczLJrUokBvQdj6H6KsngdmBC07WfWU+yL2MBp71ozA==}
+    engines: {node: '>= 14.15.0'}
+    peerDependencies:
+      aws-cdk-lib: ^2.114.1
+      constructs: ^10.0.0
+
+  '@aws-cdk/aws-apigatewayv2-authorizers-alpha@2.114.1-alpha.0':
+    resolution: {integrity: sha512-wvQ7l+VsDf8SgcOylLnp/6SirDcE5D3WNyQMl5ynxtmzuK5OKSnlC07bruKtKpYVT4A/6tBq/VVILfCBphyMJg==}
+    engines: {node: '>= 14.15.0'}
+    peerDependencies:
+      '@aws-cdk/aws-apigatewayv2-alpha': 2.114.1-alpha.0
+      aws-cdk-lib: ^2.114.1
+      constructs: ^10.0.0
+
+  '@aws-cdk/aws-apigatewayv2-integrations-alpha@2.114.1-alpha.0':
+    resolution: {integrity: sha512-iB7vHoTguDKLeatJS4p/8OBqH4oLCG2xBn1toUFwMD9iWoRGahGiK0pYuq24baab3SuNS1LFThJw5Zu0R+cZGA==}
+    engines: {node: '>= 14.15.0'}
+    peerDependencies:
+      '@aws-cdk/aws-apigatewayv2-alpha': 2.114.1-alpha.0
+      aws-cdk-lib: ^2.114.1
+      constructs: ^10.0.0
+
+  '@aws-cdk/cloud-assembly-schema@38.0.1':
+    resolution: {integrity: sha512-KvPe+NMWAulfNVwY7jenFhzhuLhLqJ/OPy5jx7wUstbjnYnjRVLpUHPU3yCjXFE0J8cuJVdx95BJ4rOs66Pi9w==}
     bundledDependencies:
       - jsonschema
       - semver
@@ -3260,9 +3294,9 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  aws-cdk-lib@2.215.0:
-    resolution: {integrity: sha512-DvRiUEsZSc4voeqfkYGrjP0f4NJ1u94JvbVCUQ+Fci4rf25xLRSEVPzyaH9Tf7V38i0Otts1+u7seunqe+R19g==}
-    engines: {node: '>= 18.0.0'}
+  aws-cdk-lib@2.172.0:
+    resolution: {integrity: sha512-SbFn2FyKhsHQpS7M3qeMWnRKtBHELkY3rmejk07cPlJ/BCJk/af8eKyeiNEEB0AZSfIeP4ImZCLNy9JS34mlPw==}
+    engines: {node: '>= 14.15.0'}
     peerDependencies:
       constructs: ^10.0.0
     bundledDependencies:
@@ -3278,9 +3312,9 @@ packages:
       - yaml
       - mime-types
 
-  aws-cdk@2.1031.2:
-    resolution: {integrity: sha512-FI8XkslwC1Vatjdu5MXu2ww++FcZPkPt45/DJklApxMF+aGcCKOuLf+COc12QYK88GOrLBeCED6lDjNc9m/ueA==}
-    engines: {node: '>= 18.0.0'}
+  aws-cdk@2.172.0:
+    resolution: {integrity: sha512-kacztcAl12F6zlBqKCuzCZmj4vrbMhzgDAxBB4T7fXR2amQyuu6W0nWcGWWvASXeBJcw2DJ6ulpfV4wuc9dksw==}
+    engines: {node: '>= 14.15.0'}
     hasBin: true
 
   axe-core@4.11.0:
@@ -7506,9 +7540,28 @@ snapshots:
 
   '@aws-cdk/asset-awscli-v1@2.2.242': {}
 
+  '@aws-cdk/asset-kubectl-v20@2.1.4': {}
+
   '@aws-cdk/asset-node-proxy-agent-v6@2.1.0': {}
 
-  '@aws-cdk/cloud-assembly-schema@48.18.0': {}
+  '@aws-cdk/aws-apigatewayv2-alpha@2.114.1-alpha.0(aws-cdk-lib@2.172.0(constructs@10.4.3))(constructs@10.4.3)':
+    dependencies:
+      aws-cdk-lib: 2.172.0(constructs@10.4.3)
+      constructs: 10.4.3
+
+  '@aws-cdk/aws-apigatewayv2-authorizers-alpha@2.114.1-alpha.0(@aws-cdk/aws-apigatewayv2-alpha@2.114.1-alpha.0(aws-cdk-lib@2.172.0(constructs@10.4.3))(constructs@10.4.3))(aws-cdk-lib@2.172.0(constructs@10.4.3))(constructs@10.4.3)':
+    dependencies:
+      '@aws-cdk/aws-apigatewayv2-alpha': 2.114.1-alpha.0(aws-cdk-lib@2.172.0(constructs@10.4.3))(constructs@10.4.3)
+      aws-cdk-lib: 2.172.0(constructs@10.4.3)
+      constructs: 10.4.3
+
+  '@aws-cdk/aws-apigatewayv2-integrations-alpha@2.114.1-alpha.0(@aws-cdk/aws-apigatewayv2-alpha@2.114.1-alpha.0(aws-cdk-lib@2.172.0(constructs@10.4.3))(constructs@10.4.3))(aws-cdk-lib@2.172.0(constructs@10.4.3))(constructs@10.4.3)':
+    dependencies:
+      '@aws-cdk/aws-apigatewayv2-alpha': 2.114.1-alpha.0(aws-cdk-lib@2.172.0(constructs@10.4.3))(constructs@10.4.3)
+      aws-cdk-lib: 2.172.0(constructs@10.4.3)
+      constructs: 10.4.3
+
+  '@aws-cdk/cloud-assembly-schema@38.0.1': {}
 
   '@babel/code-frame@7.27.1':
     dependencies:
@@ -11768,14 +11821,15 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  aws-cdk-lib@2.215.0(constructs@10.4.3):
+  aws-cdk-lib@2.172.0(constructs@10.4.3):
     dependencies:
       '@aws-cdk/asset-awscli-v1': 2.2.242
+      '@aws-cdk/asset-kubectl-v20': 2.1.4
       '@aws-cdk/asset-node-proxy-agent-v6': 2.1.0
-      '@aws-cdk/cloud-assembly-schema': 48.18.0
+      '@aws-cdk/cloud-assembly-schema': 38.0.1
       constructs: 10.4.3
 
-  aws-cdk@2.1031.2:
+  aws-cdk@2.172.0:
     optionalDependencies:
       fsevents: 2.3.2
 
@@ -12540,7 +12594,7 @@ snapshots:
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.3(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1)
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.46.3(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.3(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.46.3(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.5(eslint@8.57.1)
       eslint-plugin-react-hooks: 5.2.0(eslint@8.57.1)
@@ -12578,7 +12632,7 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.46.3(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.3(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.46.3(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -12593,7 +12647,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.3(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.3(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.46.3(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
